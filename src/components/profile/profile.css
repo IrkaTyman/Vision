@@ -1,0 +1,256 @@
+:root{
+  --dark-pink:#A57474;
+  --red:#D25C5C;
+  --middle-pink:#FEC9C9;
+  --light-pink:#FEC9C9;
+  --beige:#F9F6F1;
+  --dark-green:#899B88;
+  --light-green:#327513;
+  --dark-grey:#D8DCD8;
+  --light-grey:#E9EDE9;
+}
+
+*{
+  box-sizing: border-box;
+}
+
+html{
+  font-size: clamp(10px,2vw,20px);
+}
+
+a{
+  text-decoration: none;
+  color:#000;
+  cursor: pointer;
+}
+
+hr{
+  border: none;
+  height: 1px;
+  background-color: var(--red);
+}
+
+/*********** FLEX CLASS ***********/
+.flex-al-c{
+  display: -webkit-flex;
+  display: -ms-flex;
+  display: flex;
+  align-items: center;
+}
+
+/*********** COMMON ***********/
+.profile{
+  width: 100%;
+  display: -webkit-flex;
+  display: -ms-flex;
+  display: flex;
+  flex-direction: column;
+  -ms-align-items: center;
+  align-items: center;
+}
+
+/********** HEADER **********/
+.header-wrapper{
+  width: 100%;
+  display: -webkit-flex;
+  display: -ms-flex;
+  display: flex;
+  justify-content: center;
+  padding: 1vw;
+  height: auto;
+  background-color: var(--dark-pink);
+}
+
+.header{
+  max-width: 1100px;
+  width: 100%;
+  height: 100%;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.header .logo{
+  height: 0.8rem;
+}
+
+.header__user-info{
+  height: 100%;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.header__user-info p{
+  font-size: 0.8rem;
+  color:#fff;
+  margin: 0;
+  margin-right: 0.5rem;
+}
+
+.user-avatar{
+  height: 100%;
+  position: relative;
+}
+
+.user-avatar__img{
+  max-height: 1rem;
+  border-radius: 50%;
+  margin-right: 0.3rem;
+}
+
+.header__user-info button{
+  width: 0.5rem;
+  height:0.5rem;
+  padding: 0;
+  background-color: var(--dark-pink);
+  min-width: 0;
+  color:white;
+  font-size: 0.5rem;
+}
+
+.header__user-info button img{
+  width: 0.4rem;
+}
+
+.modal-menu{
+  min-width: clamp(65px,20vw,125px);
+  position: absolute;
+  top: calc(100% + 1.5vw);
+  right: 0;
+  flex-direction: column;
+  background-color: #fff;
+  padding: clamp(5px,2vw,15px);
+  border-radius: 5px;
+  box-shadow: 0 0 6px 0 rgba(0,0,0,0.2);
+  display: none;
+}
+
+.modal-menu.visible{
+  display: -webkit-flex;
+  display: -ms-flex;
+  display: flex;
+}
+
+.modal-menu a{
+  font-size: 0.75rem;
+}
+
+.modal-menu a:hover{
+  font-weight: bold;
+}
+
+.modal-menu a:first-child{
+  margin-bottom: clamp(2px,1vw,7px);
+}
+
+/**********   MAIN   *************/
+
+main{
+  max-width: 1100px;
+  width: 100%;
+  display: -webkit-flex;
+  display: -ms-flex;
+  display: flex;
+  background-color: var(--beige);
+  padding: clamp(10px,2vw,30px) clamp(15px,3vw,30px);
+}
+
+/***********   MENU   *************/
+
+.menu-wrapper{
+  width:clamp(100px,25%,300px);
+  min-width:100px;
+  display: -webkit-flex;
+  display: -ms-flex;
+  display: flex;
+  flex-direction: column;
+  -ms-align-items: center;
+  align-items: flex-start;
+  margin-right: clamp(10px, 2vw,30px);
+}
+
+.menu-wrapper a{
+  width: 100%;
+}
+
+.menu-item{
+  width: 100%;
+  display: -webkit-flex;
+  display: -ms-flex;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -ms-align-items: center;
+  align-items: center;
+  height: 100%;
+  padding: clamp(5px,1vw,10px);
+  margin: 0 0 clamp(10px,2vw,30px) 0;
+  border-radius: 5px;
+}
+
+.menu-item:hover{
+  background-color: var(--light-grey);
+}
+
+.menu-item p{
+  margin: 0;
+}
+
+.menu-item img{
+  padding-right: clamp(3px,1vw,8px);
+  max-width: 25px;
+  width: clamp(12px, 3vw, 25px);
+}
+
+.main-page__wrapper{
+  width: 70%;
+}
+
+/************   HOME   **************/
+.home__wrapper{
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.person_block__wrapper{
+  width: 100%;
+}
+
+.person_block__img{
+  max-width: 100%;
+  border-radius: 50%;
+  margin-bottom: clamp(5px,2vw,15px);
+}
+
+.person_block__wrapper .redButton{
+  margin-bottom: clamp(5px,2vw,15px);
+}
+
+.person_block__wrapper hr{
+  margin-bottom: clamp(5px,2vw,15px);
+}
+
+.person_block__info{
+  display: -webkit-flex;
+  display: -ms-flex;
+  display: flex;
+  flex-direction: column;
+  -ms-align-items: center;
+  align-items: center;
+}
+
+.person_block__info p{
+  margin-bottom: clamp(3px,1vw,7px);
+}
+
+.person_block__info_status{
+  font-size:0.8rem;
+  color:var(--dark-green);
+}
+
+.person_block__info_balance{
+  font-size: 0.8rem;
+}
