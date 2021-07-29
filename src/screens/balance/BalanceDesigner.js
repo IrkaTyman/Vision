@@ -13,7 +13,8 @@ import {currencySpelling} from '../../function/currencySpelling'
 import {FormInput} from '../../components/FormInput';
 
 const BalanceDesigner = ({user}) => {
-  let date = (new Date()).toLocaleString()
+  let date = new Date()
+  let dateStr = date.toLocaleString()
 
   const { control, handleSubmit, formState: { errors } } = useForm();
   const dispatch = useDispatch();
@@ -25,7 +26,7 @@ const BalanceDesigner = ({user}) => {
   return(
     <ScrollView style={[styles.container,styles.profileWrapper]}>
       <View style={styles.profileBlock}>
-        <Text style={[styles.all,styles.h3,styles.bold]}>{`Ваш баланс на ${date.slice(0,10)}`}</Text>
+        <Text style={[styles.all,styles.h3,styles.bold]}>{`Ваш баланс на ${dateStr.slice(0,10)}`}</Text>
         <Text style={styles.all}>
           <Text style={[styles.darkPinkColor,styles.bold]}>{user.balance} </Text>
           {currencySpelling(user.balance.toString())}
