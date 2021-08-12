@@ -19,7 +19,7 @@ function fontSizer (screenWidth) {
     return 14;
   }
 }
-const colors = {
+export const colors = {
   darkPink:'#A57474',
   red:'#D25C5C',
   middlePink:'#D25C5C',

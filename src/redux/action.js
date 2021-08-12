@@ -23,6 +23,10 @@ export const editPerson = ({email,username,surname,password,tel,status,id,img}) 
  return {type:'register/edit_userdata', payload:{email,username,surname,password,tel,status,id,img}
 }}
 
+export const removePerson = () => {
+  return {type:'register/remove_person', payload:{}}
+}
+
  const actionCreators = {
   addPerson,
   checkRepeatEmail,

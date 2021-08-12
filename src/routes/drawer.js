@@ -7,7 +7,8 @@ import {
 import {createAppContainer} from 'react-navigation';
 import {Text,View,Image} from 'react-native'
 import {FontAwesome} from '@expo/vector-icons'
-import {connect,useSelector} from 'react-redux'
+import {connect,useSelector, useDispatch} from 'react-redux'
+import {removePerson} from '../redux/action'
 import {Svg,Path,Circle} from 'react-native-svg'
 
 //Stack
@@ -20,11 +21,15 @@ import ReferenceStack from './referenceStack'
 
 import {styles,fontSizeMain} from '../components/Style'
 import {Home,Cart,Wallet,Support,Question} from '../components/SVG'
+import Application from '../../Application'
 
 const Drawer = createDrawerNavigator()
 
+
 const DrawerContent = (props) => {
   const user = useSelector(store => store.register.user)
+  const dispatch = useDispatch()
+
   return(
     <View style={styles.drawer}>
     <DrawerContentScrollView>
@@ -89,7 +94,7 @@ const DrawerContent = (props) => {
         <DrawerItem
           label='Выйти'
           icon = {() => <FontAwesome name='sign-out' size={fontSizeMain} color='#D25C5C'/>}
-          onPress={() => props.navigation.navigate('Edit0')}
+          onPress={() => {}}
           labelStyle = {styles.all}
           style = {styles.logOut}
         />

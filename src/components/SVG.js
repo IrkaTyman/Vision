@@ -8,7 +8,6 @@ export const Home = (props) => {
     </Svg>
   )
 }
-
 export const Cart = (props) => {
   return(
     <Svg width={props.width} height={props.height} x="0" y="0" viewBox="0 0 512.002 512.002">

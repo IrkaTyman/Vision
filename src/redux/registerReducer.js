@@ -10,6 +10,7 @@ const initialState = {
   actionLog:'logIn',
   incEmOrPas:false,
   logo:logo,
+  isLogin:true
 }
 
 export default function registerReducer(state = initialState,action){
@@ -78,6 +79,11 @@ export default function registerReducer(state = initialState,action){
           balance:action.payload
         }
       }
+
+    case 'register/remove_person':
+      return{...state,
+            user:{},
+            isLogin:false}
 
     default: return state
   }
