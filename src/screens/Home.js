@@ -4,7 +4,7 @@ import {Button} from '../components/Button'
 import Slider from '../components/slider/Slider'
 
 import {connect,useSelector,useDispatch} from 'react-redux'
-import {actionCreators as actions,addPerson} from '../redux/action'
+import {addPerson} from '../redux/action'
 import {styles} from '../components/Style'
 import {currencySpelling} from '../function/currencySpelling'
 

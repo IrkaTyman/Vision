@@ -2,15 +2,17 @@ import logo from '../img/Logo.png'
 
 
 let imgDefault= 'https://www.blexar.com/avatar.png'
-
+//{id:'0',email:'tymanira@mail.ru',username:'Ira',surname:'',password:'0000',tel:'',status:'designer',img:imgDefault,balance:1000},
 const initialState = {
-  user:{id:'0',email:'tymanira@mail.ru',username:'Ira',surname:'',password:'0000',tel:'',status:'designer',img:imgDefault,balance:1000},
+  user:{},
   repeatEmail:false,
   users:{},
-  actionLog:'logIn',
-  incEmOrPas:false,
   logo:logo,
-  isLogin:true
+  isLogin:false,
+  incorEmailOrPass:false,
+  faceParameters:{},
+  bodyParameters:{},
+  noCompleteOrder:false
 }
 
 export default function registerReducer(state = initialState,action){
@@ -19,58 +21,17 @@ export default function registerReducer(state = initialState,action){
       return {
         ...state,
         user:{
-          id:action.payload.id,
           email:action.payload.email,
           username:action.payload.username,
           surname:action.payload.surname|| '',
           password:action.payload.password,
           tel:action.payload.tel,
           status:action.payload.status,
-          img:action.payload.img || imgDefault,
+          img:action.payload.img != '' ? action.payload.img : imgDefault,
           balance:0
-        }
+        },
+        isLogin:true
       }
-
-    case 'register/get_all_users':
-      return{
-        ...state,
-        users:action.payload
-    }
-
-    case 'register/check_repeat_email':
-      return{
-        ...state,
-        repeatEmail:action.payload
-    }
-
-    case 'register/change_action_log':
-      return{
-        ...state,
-        actionLog:action.payload
-    }
-
-    case 'register/incorrect_email_or_pass':
-      return{
-        ...state,
-        incEmOrPas:action.payload
-    }
-
-    case 'register/edit_userdata':
-      return{
-        ...state,
-        user:{
-          ...state.user,
-          id:action.payload.id,
-          email:action.payload.email,
-          username:action.payload.username,
-          surname:action.payload.surname|| '',
-          password:action.payload.password,
-          tel:action.payload.tel,
-          status:action.payload.status,
-          img:action.payload.img || imgDefault,
-        }
-      }
-
     case 'register/withdraw_money':
       return{
         ...state,
@@ -79,11 +40,23 @@ export default function registerReducer(state = initialState,action){
           balance:action.payload
         }
       }
-
     case 'register/remove_person':
       return{...state,
-            user:{},
-            isLogin:false}
+        user:{},
+        isLogin:false}
+    case 'register/repeat_email':
+      return{...state,
+        repeatEmail:action.payload}
+    case 'register/incorrect_email_or_password':
+      return{...state,
+        incorEmailOrPass:action.payload}
+    case 'register/add_face_parameters':
+      return{...state,
+        faceParameters:action.payload}
+
+    case 'register/add_body_parameters':
+      return{...state,
+        bodyParameters:action.payload}
 
     default: return state
   }

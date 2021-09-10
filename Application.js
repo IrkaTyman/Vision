@@ -1,39 +1,80 @@
-import React from 'react';
+import React,{useEffect} from 'react';
 import { StyleSheet, Text, View, SafeAreaView} from 'react-native';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import firebase from 'firebase'
 //Redux
-import {connect} from 'react-redux'
-import {addPerson,removePerson} from './src/redux/action'
+import {connect,useDispatch} from 'react-redux'
+import {addPerson,removePerson,repeatEmail,incorEmailOrPass,addFaceParameters,addBodyParameters} from './src/redux/action'
 
 //Components
 import {styles} from './src/components/Style'
 import {Button} from './src/components/Button'
-import SignIn from './src/screens/SignIn'
+import RegistrationWrapper from './src/screens/RegistrationWrapper'
 import Home from './src/screens/Home'
 import HomeStack from './src/routes/homeStack'
 import {RootDrawerNavigation} from './src/routes/drawer'
 
-class Application extends React.Component {
-  constructor(props){
-    super(props)
-    this.state = {
-      isLogin:this.props.isLogin,
+
+const Application = (props) => {
+  const isLogin = props.isLogin
+  const dispatch = useDispatch()
+  let db = firebase.firestore()
+  let data
+
+  useEffect(()=>{
+    db.collection('faceParameters').get().then((param) => {
+      param.forEach((doc) => {
+        let data = doc.data()
+        dispatch(addFaceParameters(data))
+      });
+    })
+    db.collection('bodyParameters').get().then((param) => {
+      param.forEach((doc) => {
+        let data = doc.data()
+        dispatch(addBodyParameters(data))
+      });
+    })
+    async () => data = await AsyncStorage.getItem('userData');
+  },[])
+
+  const submitLogupBtn = (user,designer) => {
+      user.balance=0
+      user.orders={}
+      user.img=''
+      user.status = designer ? 'designer' : 'client'
+      let emailStr = user.email.replace('.','')
+      firebase.database().ref('users/'+emailStr).get().then((snapshot) => {
+        if (snapshot.exists()) {
+          dispatch(repeatEmail(true))
+          console.log('repeat email')
+        } else {
+          dispatch(repeatEmail(false))
+          firebase.database().ref('users/' + emailStr).set(user);
+          dispatch(addPerson(user))
+        }
+      }).catch((error) => {
+        console.error(error);
+      })
+  }
+  const submitLoginBtn = (user) => {
+    let emailStr = user.email.replace('.','')
+    firebase.database().ref('users/'+emailStr).get().then((snapshot) => {
+      if (snapshot.exists()) {
+        console.log(1)
+        if(snapshot.val().password == user.password){
+          dispatch(incorEmailOrPass(false))
+          dispatch(addPerson(snapshot.val()))
+        } else dispatch(incorEmailOrPass(true))
+      } else {
+        dispatch(incorEmailOrPass(true))
       }
-    this.signOut = this.signOut.bind(this)
+    }).catch((error) => {
+      console.error(error);
+    })
   }
 
-  componentDidMount() {
-    /*ToDo FIREBASE*/
-    /*ToDo Google Auth*/
-  }
-
-  signOut(){
-      dispatch(removePerson())
-      this.setState({ isLogin:false})
-    }
-
-  /*FIREBASE function
-    setUserData({email,username,password,tel,status,img,id}) {
+  //FIREBASE function
+  /*setUserData({email,username,password,tel,status,img,id}) {
       firebase.database().ref('users/' + email.replace('.','')).set({
         email: email,
         username: username,
@@ -59,22 +100,6 @@ class Application extends React.Component {
       }
     });
   }*/
-
-  /*GOOGLE AUTH function
-    signInWithGoogle(e){
-      const _authOk = (userGet) => {
-        let user = userGet.getBasicProfile();
-        this.submitRegisterHandler(e,{email:user.getEmail(), username:user.getName(), password: '', tel: '', status: 'person', id:Date.now().toString()},'google')
-      }
-      const GoogleAuth = window.gapi.auth2.getAuthInstance();
-      GoogleAuth.signIn({ scope:'profile email' }).then( _authOk, () => console.log('Auth Err'))
-  }
-
-  signOutWithGoogle(){
-      const GoogleAuth = window.gapi.auth2.getAuthInstance()
-      GoogleAuth.signOut()
-  }*/
-
   /*Registration function
   createUserDate(emailStr,userGet,service){
     const usersRef = firebase.database().ref(`users/${emailStr}`);
@@ -111,17 +136,15 @@ class Application extends React.Component {
       }
   }*/
 
-
-  render(){
-    if(this.state.isLogin){
-      return <RootDrawerNavigation/>
-    }
-    return <SignIn/>
-  }
+  return(
+    isLogin ? <RootDrawerNavigation/> : <RegistrationWrapper login = {submitLoginBtn} logup={submitLogupBtn}/>
+  )
 }
 
 let mapStoreToProps = (store) => ({
-  isLogin:store.register.isLogin
+  isLogin:store.register.isLogin,
+  user:store.register.user,
+  faceParameters:store.register.faceParameters
 })
 
 export default connect(mapStoreToProps)(Application)

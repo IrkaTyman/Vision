@@ -2,11 +2,10 @@ import React from 'react';
 import { StyleSheet, Dimensions,Platform} from 'react-native';
 
 //const STYLE
-const {
+export const {
   width: SCREEN_WIDTH,
   height: SCREEN_HEIGHT,
 } = Dimensions.get('window');
-
 export const fontSizeMain = fontSizer(SCREEN_WIDTH)
 
 //func for STYLE
@@ -29,6 +28,7 @@ export const colors = {
   lightGreen:'#327513',
   darkGrey:'#D8DCD8',
   lightGrey:'#E9EDE9',
+  darkBeige:'#F7EDDA'
 }
 
 //FOR SLIDER
@@ -47,6 +47,7 @@ export const sliderWidth = SCREEN_WIDTH - 32;
 export const itemWidth = slideWidth + itemHorizontalMargin * 2;
 
 export const sliderBAWidth = SCREEN_WIDTH - 4*fontSizeMain
+export const newOrderPhotoWidth = SCREEN_WIDTH - 2*fontSizeMain
 
 //STYLE
 export const styles = StyleSheet.create({
@@ -103,8 +104,14 @@ export const styles = StyleSheet.create({
   bold:{
     fontFamily:"Montserrat-500",
   },
+  boldest:{
+    fontFamily:"Montserrat-700",
+  },
   redColor:{
     color:colors.red
+  },
+  greyColor:{
+    opacity:.6
   },
   /******************DRAWER*******************/
 drawer:{
@@ -274,7 +281,15 @@ incorrectValue:{
   color:colors.red,
   fontFamily:'Montserrat-700',
   position:'absolute',
-  bottom:fontSizeMain*0.8
+  bottom:fontSizeMain*0.8,
+  zIndex:100
+},
+repeatEmail:{
+  fontSize:0.8*fontSizeMain,
+  color:colors.red,
+  fontFamily:'Montserrat-700',
+  position:'absolute',
+  top:-fontSizeMain*0.9,
 },
 incorrectValueInput:{
   borderColor:colors.red
@@ -362,15 +377,83 @@ referenceItem:{
 referenceItemIcon:{
   marginRight:fontSizeMain
 },
-});
 /*************REGISTRATE/LOGIN****************/
-  /*registrationWrapper: {
-    paddingHorizontal: '3vw',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100vh',
-    width: '100%',
-    backgroundColor: '#F9F6F1',
-  }
-});*/
+regWrapper: {
+  paddingHorizontal: 2*fontSizeMain,
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  flex:1,
+  backgroundColor: '#F0E9E9',
+},
+regLink:{
+  flexDirection:'row'
+},
+regPage:{
+  marginTop:1.5*fontSizeMain,
+  width:'100%',
+  justifyContent:'center',
+  alignItems:'center'
+},
+regInput:{
+  marginBottom:fontSizeMain*2,
+  width:SCREEN_WIDTH - 4*fontSizeMain
+},
+checksWrap:{
+  width:SCREEN_WIDTH - 4*fontSizeMain,
+  justifyContent:'space-between',
+  flexDirection:'row',
+  marginBottom:fontSizeMain*2
+},
+checkText:{
+  marginLeft:fontSizeMain*0.4,
+  color:colors.darkPink,
+  fontFamily:'Montserrat-500'
+},
+checkWrap:{
+  flexDirection:'row',
+  alignItems:'center',
+},
+/************ NEW ORDER ***********/
+newOrderPhoto:{
+  width:newOrderPhotoWidth,
+  resizeMode:'contain',
+},
+newOrderPicker:{
+  width:newOrderPhotoWidth,
+  backgroundColor:colors.lightGrey,
+  height:200,
+  justifyContent:'center',
+  alignItems:'center'
+},
+bodyOrFaceWrap:{
+  width:'100%',
+  flexDirection:'row',
+  justifyContent:'flex-start',
+  marginBottom:fontSizeMain*1.5,
+  alignItems:'center'
+},
+bodyOrFaceButton:{
+  width:'50%',
+  padding:fontSizeMain,
+  flexDirection:'row',
+  justifyContent:'center',
+},
+bodyOrFaceWindow:{
+  position:'absolute',
+  top:fontSizeMain,
+  left:fontSizeMain,
+  width:SCREEN_WIDTH-2*fontSizeMain,
+  backgroundColor:colors.darkBeige,
+  padding:fontSizeMain,
+  zIndex: 100,
+},
+bodyOrFaceParam:{
+  marginBottom:fontSizeMain
+},
+paramMinus:{
+  width:1.5*fontSizeMain,
+  height:2,
+  backgroundColor:colors.red
+},
+});

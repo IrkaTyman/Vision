@@ -1,37 +1,23 @@
-export const addPerson = ({email,username,surname,password,tel,status,id,img,balance}) => {
-  return {type:'register/add_person', payload:{email,username,surname,password,tel,status,id,img,balance}}
-}
-
- const checkRepeatEmail = (repeatEmail) => {
-  return {type:'register/check_repeat_email', payload:repeatEmail}
-}
-
- const changeActionLog = (actionLog) => {
-  return {type:'register/change_action_log', payload:actionLog}
-}
-
- const getAllUsers = (users) => {
-  return {type:'register/get_all_users', payload:users}
+export const addPerson = ({email,username,surname,password,tel,status,img,balance}) => {
+  return {type:'register/add_person', payload:{email,username,surname,password,tel,status,img,balance}}
 }
 
 export const withdrawMoney = (balance) => {
  return {type:'register/withdraw_money', payload:balance}
 }
 
-
-export const editPerson = ({email,username,surname,password,tel,status,id,img}) => {
- return {type:'register/edit_userdata', payload:{email,username,surname,password,tel,status,id,img}
-}}
-
-export const removePerson = () => {
-  return {type:'register/remove_person', payload:{}}
+export const removePerson = (desc) => {
+  return {type:'register/remove_person', payload:{desc}}
 }
-
- const actionCreators = {
-  addPerson,
-  checkRepeatEmail,
-  changeActionLog,
-  getAllUsers,
-  withdrawMoney
+export const repeatEmail = (bool) => {
+  return {type:'register/repeat_email', payload:{bool}}
 }
-export {actionCreators}
+export const incorEmailOrPass = (bool) => {
+  return {type:'register/incorrect_email_or_password', payload:{bool}}
+}
+export const addFaceParameters = (object) => {
+  return {type:'register/add_face_parameters', payload:object}
+}
+export const addBodyParameters = (object) => {
+  return {type:'register/add_body_parameters', payload:object}
+}

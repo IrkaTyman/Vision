@@ -4,7 +4,7 @@ import {styles} from './Style'
 
 export function FormInput(props) {
   return (
-    <View >
+    <View style={{position:'relative'}}>
       {props.label != ''
           ? <Text style={props.styleLabel}>{props.label}</Text>
           : null}

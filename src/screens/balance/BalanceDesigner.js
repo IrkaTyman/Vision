@@ -96,7 +96,7 @@ const BalanceDesigner = ({user}) => {
             />
           )}
         />
-        <Button onPress={handleSubmit(onSubmitWithdraw)} title="Вывести" />
+        <Button onPress={handleSubmit(onSubmitWithdraw)} title={user.status == 'designer' ? 'Вывести' : 'Ввести'} />
         <Text style={[styles.all,styles.darkPinkColor,styles.h3,styles.bold,{marginTop:fontSizeMain}]}>* Условия вывода</Text>
         <Text style={[styles.all,styles.darkPinkColor, styles.profileInfoText]}>Минимальная сумма для вывода <Text style={styles.bold}>1000</Text> рублей</Text>
         <Text style={[styles.all,styles.darkPinkColor, styles.profileInfoText]}>Вижены спишутся со счета в момент подачи заявки</Text>

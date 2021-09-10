@@ -10,6 +10,7 @@ import {FontAwesome} from '@expo/vector-icons'
 import {connect,useSelector, useDispatch} from 'react-redux'
 import {removePerson} from '../redux/action'
 import {Svg,Path,Circle} from 'react-native-svg'
+import firebase from 'firebase'
 
 //Stack
 import HomeStack from './homeStack'
@@ -21,14 +22,26 @@ import ReferenceStack from './referenceStack'
 
 import {styles,fontSizeMain} from '../components/Style'
 import {Home,Cart,Wallet,Support,Question} from '../components/SVG'
-import Application from '../../Application'
+
 
 const Drawer = createDrawerNavigator()
-
-
 const DrawerContent = (props) => {
   const user = useSelector(store => store.register.user)
   const dispatch = useDispatch()
+  const db= firebase.database().ref('orders')
+
+  const takeNewOrder = () => {
+    console.log(1)
+    db.orderByChild('date').limitToFirst(1).get().then((snap)=>{
+      if(snap.exists()){
+        Object.keys(snap.val()).map((item) => {
+          let order = snap.val()[item]
+          order.designer = user.email
+          firebase.database().ref('orders/'+item).set(order)
+        })
+      }
+    }).catch((err)=>console.log(err))
+  }
 
   return(
     <View style={styles.drawer}>
@@ -54,13 +67,11 @@ const DrawerContent = (props) => {
             <Cart width={fontSizeMain} height={fontSizeMain}/>
             <Text style={[styles.all,{marginLeft:fontSizeMain*2}]}>Заказы</Text>
           </View>
-          {user.status == 'designer' ?
-              <DrawerItem
-                label='+ Новый заказ'
-                onPress={() => props.navigation.navigate('NewOrders')}
-                labelStyle = {[styles.all,styles.drawerOrdersItem]}
-              /> : null}
-
+          <DrawerItem
+            label='+ Новый заказ'
+            onPress={() => user.status=='designer' ? takeNewOrder() : props.navigation.navigate('NewOrders')}
+            labelStyle = {[styles.all,styles.drawerOrdersItem]}
+          />
           <DrawerItem
             label='Текущие'
             onPress={() => props.navigation.navigate('NowOrders')}
@@ -94,7 +105,7 @@ const DrawerContent = (props) => {
         <DrawerItem
           label='Выйти'
           icon = {() => <FontAwesome name='sign-out' size={fontSizeMain} color='#D25C5C'/>}
-          onPress={() => {}}
+          onPress={() => dispatch(removePerson('Log out'))}
           labelStyle = {styles.all}
           style = {styles.logOut}
         />

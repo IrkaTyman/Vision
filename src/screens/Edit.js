@@ -2,10 +2,11 @@ import React,{useState, useEffect} from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useForm, Controller } from "react-hook-form";
+import firebase from 'firebase'
 
 //REDUX
 import {connect,useSelector,useDispatch} from 'react-redux'
-import {editPerson} from '../redux/action'
+import {addPerson} from '../redux/action'
 
 //COMPONENTS
 import { Platform, Text, View, Image,Pressable,TouchableWithoutFeedback, Keyboard } from 'react-native';
@@ -35,6 +36,7 @@ const Edit = (props) => {
 
    const submitEditBtn = (data) => {
      const dataUser = data
+
      for(let key in props.user){
        if(!dataUser[key] || (dataUser[key] == '' && props.user[key] != '')){
          dataUser[key] = props.user[key]
@@ -43,21 +45,24 @@ const Edit = (props) => {
      if(image){
        dataUser.img = image
      }
-     dispatch(editPerson(dataUser))
+     let emailStr = dataUser.email.replace('.','')
+     dispatch(addPerson(dataUser))
+     firebase.database().ref('users/' + emailStr).set(dataUser);
    }
 
-   const pickImage = async () => {
-     let result = await ImagePicker.launchImageLibraryAsync({
-       mediaTypes: ImagePicker.MediaTypeOptions.All,
-       allowsEditing: true,
-       aspect: [4, 3],
-       quality: 1,
-     });
-     if (!result.cancelled) {
-       setImage(result.uri);}
-   };
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    if (!result.cancelled) {
+      setImage(result.uri);    
+    }
+  };
  return (
-   <TouchableWithoutFeedback onPress={()=>Keyboard.dismiss()}>
+
      <View style={[styles.container,styles.containerWithoutBlock,]}>
        <View style={styles.editNameOrSurnameOrImgWrapper}>
          <View style={{position:'relative'}}>
@@ -122,13 +127,14 @@ const Edit = (props) => {
          rules={{
            pattern: {
              value: EMAIL_REGEX,
-             message: 'Not a valid email'
+             message: 'Некорректный адрес'
            }
          }}
          render={({ field: { onChange, value } }) => (
            <FormInput
                options={{
                   maxLength:15,
+                  placeholder:props.user.email || '',
                   onChangeText:(text) => onChange(text),
                   value:value
                }}
@@ -150,12 +156,13 @@ const Edit = (props) => {
          rules={{
            pattern: {
              value: TEL_REGEX,
-             message: 'Not a valid telephone'
+             message: 'Некорректный номер телефона'
            }
          }}
          render={({ field: { onChange, value } }) => (
            <FormInput
                options={{
+                  placeholder:props.user.tel || '',
                   onChangeText:(text) => onChange(text),
                   value:value
                }}
@@ -194,7 +201,7 @@ const Edit = (props) => {
        />
        <Button onPress={handleSubmit(submitEditBtn)} title="Сохранить" />
      </View>
-     </TouchableWithoutFeedback>
+
 
 )};
 

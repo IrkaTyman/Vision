@@ -2,11 +2,12 @@ import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import * as Font from 'expo-font';
 import { NavigationContainer } from '@react-navigation/native';
-
+import firebase from 'firebase'
 //Redux
 import {createStore} from 'redux'
 import {Provider} from 'react-redux'
 import {rootReducer} from './src/redux/rootReducer'
+
 
 const store = createStore(rootReducer)
 
@@ -23,17 +24,32 @@ let customFonts = {
 };
 let font = 'serif'
 
-
 export default class App extends React.Component {
   constructor(props){
     super(props)
     this.state = {
-      isOpen:false
+      isOpen:false,
+      data:{}
       }
   }
 
   componentDidMount() {
-    this._loadAsync();
+    const firebaseConfig = {
+      apiKey: "AIzaSyDVmO4RKAoMawu-rL4dSQxHerH3csFPQNU",
+      authDomain: "fotou-bde18.firebaseapp.com",
+      databaseURL: "https://fotou-bde18-default-rtdb.firebaseio.com",
+      projectId: "fotou-bde18",
+      storageBucket: "fotou-bde18.appspot.com",
+      messagingSenderId: "699484489454",
+      appId: "1:699484489454:web:82d71271ccd3253a1a15ff",
+      measurementId: "G-RLDF2ZNVZ6"
+    };
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    } else {
+       firebase.app();
+    }
+    this._loadAsync()
   }
 
   //FONT
