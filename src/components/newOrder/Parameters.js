@@ -5,21 +5,21 @@ import BouncyCheckbox from "react-native-bouncy-checkbox";
 import {Button} from '../Button'
 import {connect} from 'react-redux'
 
-export const BodyParameters = (props) => {
+export const Parameters = (props) => {
   const paramObj = {}
   const postParameters = () => {
     const paramKeys = Object.keys(paramObj)
     const paramGot = {}
       for (let i = 0; i < paramKeys.length; i++){
         if(paramObj[paramKeys[i]] == true){
-          paramGot[`${paramKeys[i]}`] = props.bodyParameters[`${paramKeys[i]}`]
+          paramGot[`${paramKeys[i]}`] = props.parameters[`${paramKeys[i]}`]
         }
       }
       props.sendParam(paramGot)
   }
   return(
     <View style={styles.bodyOrFaceWindow}>
-      {Object.keys(props.bodyParameters).map((item,id) => {
+      {Object.keys(props.parameters).map((item,id) => {
         return (<BouncyCheckbox
           size={fontSizeMain*1.5}
           fillColor={colors.red}
@@ -32,16 +32,6 @@ export const BodyParameters = (props) => {
           onPress={(isChecked) => {paramObj[`${item}`]=isChecked}}/>)
       })}
       <Button title='Продолжить' onPress={()=>{postParameters()}}/>
-
     </View>
   )
 }
-BodyParameters.navigationOptions = {
-    title: 'BodyParameters'
-};
-
-let mapStoreToProps = (store) => ({
-  bodyParameters:store.register.bodyParameters
-})
-
-export default connect(mapStoreToProps)(BodyParameters)

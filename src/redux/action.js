@@ -1,5 +1,5 @@
-export const addPerson = ({email,username,surname,password,tel,status,img,balance}) => {
-  return {type:'register/add_person', payload:{email,username,surname,password,tel,status,img,balance}}
+export const addPerson = ({email,username,surname,password,tel,status,img,balance, orders}) => {
+  return {type:'register/add_person', payload:{email,username,surname,password,tel,status,img,balance, orders}}
 }
 
 export const withdrawMoney = (balance) => {
@@ -20,4 +20,10 @@ export const addFaceParameters = (object) => {
 }
 export const addBodyParameters = (object) => {
   return {type:'register/add_body_parameters', payload:object}
+}
+export const addNowOrder = (object) => {
+  return {type:'register/add_now_order', payload:object}
+}
+export const addOldOrders = (array) => {
+  return {type:'register/add_old_orders', payload:array}
 }

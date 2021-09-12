@@ -8,12 +8,12 @@ import {connect,useSelector,useDispatch} from 'react-redux'
 import {actionCreators as actions,addPerson} from '../redux/action'
 import {styles} from '../components/Style'
 
- const NowOrders = ({user,navigation}) => {
+ const NowOrders = ({user,navigation,nowOrder}) => {
     return (
       <ScrollView style={[styles.container,styles.profileWrapper]}>
         <View style={styles.ordersBlock}>
-          {ordersGot[0]
-            ? <OrderInfoNow data={ordersGot[0]} id = {ordersGot.length}/>
+          {nowOrder.client
+            ? <OrderInfoNow data={nowOrder} id = {ordersGot.length}/>
             : <View style={styles.notOrder}>
               <Text style={[styles.all,styles.bold,styles.darkPinkColor]}>
                 Пока здесь ничего нет
@@ -29,7 +29,8 @@ NowOrders.navigationOptions = {
 };
 
 let mapStoreToProps = (store) => ({
-  user:store.register.user
+  user:store.register.user,
+  nowOrder:store.register.nowOrder
 })
 
 export default connect(mapStoreToProps)(NowOrders)

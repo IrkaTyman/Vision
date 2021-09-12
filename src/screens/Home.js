@@ -18,8 +18,8 @@ import {currencySpelling} from '../function/currencySpelling'
               <Text style={[styles.all,styles.profileInfoTextName,styles.profileInfoText,styles.darkPinkColor]}>{user.username}</Text>
               <Text style={[styles.all,,styles.profileInfoText,styles.darkPinkColor]}>{user.status}</Text>
               <Text style={[styles.all,,styles.profileInfoText,styles.darkPinkColor]}>Баланс:
-                <Text style={styles.bold}> {user.balance} </Text>
-                {currencySpelling(user.balance.toString())}
+                <Text style={styles.bold}> {currencySpelling(user.balance.toString())} </Text>
+
               </Text>
             </View>
           </View>

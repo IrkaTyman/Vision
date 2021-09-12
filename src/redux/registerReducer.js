@@ -6,13 +6,13 @@ let imgDefault= 'https://www.blexar.com/avatar.png'
 const initialState = {
   user:{},
   repeatEmail:false,
-  users:{},
   logo:logo,
   isLogin:false,
   incorEmailOrPass:false,
   faceParameters:{},
   bodyParameters:{},
-  noCompleteOrder:false
+  nowOrder:{},
+  oldOrders:{}
 }
 
 export default function registerReducer(state = initialState,action){
@@ -28,7 +28,8 @@ export default function registerReducer(state = initialState,action){
           tel:action.payload.tel,
           status:action.payload.status,
           img:action.payload.img != '' ? action.payload.img : imgDefault,
-          balance:0
+          balance:0,
+          orders:action.payload.orders
         },
         isLogin:true
       }
@@ -43,7 +44,8 @@ export default function registerReducer(state = initialState,action){
     case 'register/remove_person':
       return{...state,
         user:{},
-        isLogin:false}
+        isLogin:false,
+        incorEmailOrPass:false}
     case 'register/repeat_email':
       return{...state,
         repeatEmail:action.payload}
@@ -57,6 +59,13 @@ export default function registerReducer(state = initialState,action){
     case 'register/add_body_parameters':
       return{...state,
         bodyParameters:action.payload}
+
+    case 'register/add_now_order':
+      return{...state,
+        nowOrder:action.payload}
+    case 'register/add_old_orders':
+      return{...state,
+        oldOrders:action.payload}
 
     default: return state
   }

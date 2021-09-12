@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import firebase from 'firebase'
 //Redux
 import {connect,useDispatch} from 'react-redux'
-import {addPerson,removePerson,repeatEmail,incorEmailOrPass,addFaceParameters,addBodyParameters} from './src/redux/action'
+import {addPerson,removePerson,repeatEmail,incorEmailOrPass,addFaceParameters,addBodyParameters, addNowOrder,addOldOrders} from './src/redux/action'
 
 //Components
 import {styles} from './src/components/Style'
@@ -12,7 +12,7 @@ import {Button} from './src/components/Button'
 import RegistrationWrapper from './src/screens/RegistrationWrapper'
 import Home from './src/screens/Home'
 import HomeStack from './src/routes/homeStack'
-import {RootDrawerNavigation} from './src/routes/drawer'
+import {RootDrawerNavigation} from './src/routes/rootDrawer'
 
 
 const Application = (props) => {
@@ -57,11 +57,26 @@ const Application = (props) => {
       })
   }
   const submitLoginBtn = (user) => {
+    let oldOrders = []
+    let nowOrder = {}
     let emailStr = user.email.replace('.','')
     firebase.database().ref('users/'+emailStr).get().then((snapshot) => {
       if (snapshot.exists()) {
-        console.log(1)
         if(snapshot.val().password == user.password){
+          let orders = snapshot.val().orders
+          if(orders){
+            orders.map((item) => {
+              firebase.database().ref('orders/'+item).get().then((snap)=>{
+                if(snap.exists()){
+                  if(snap.val().status == 'inWork'||snap.val().status == 'inRating'){
+                     dispatch(addNowOrder(snap.val()))
+                  } else oldOrders.push(snap.val())
+                  if(item = orders[orders.length-1]){
+                    dispatch(addOldOrders(oldOrders))
+                  }
+                }
+              })
+            })}
           dispatch(incorEmailOrPass(false))
           dispatch(addPerson(snapshot.val()))
         } else dispatch(incorEmailOrPass(true))

@@ -440,13 +440,9 @@ bodyOrFaceButton:{
   justifyContent:'center',
 },
 bodyOrFaceWindow:{
-  position:'absolute',
-  top:fontSizeMain,
-  left:fontSizeMain,
-  width:SCREEN_WIDTH-2*fontSizeMain,
-  backgroundColor:colors.darkBeige,
   padding:fontSizeMain,
-  zIndex: 100,
+  width:'100%',
+  backgroundColor:colors.darkBeige,
 },
 bodyOrFaceParam:{
   marginBottom:fontSizeMain

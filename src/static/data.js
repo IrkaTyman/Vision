@@ -3,7 +3,7 @@ export let ordersGot= [
  {
     dateNew:date.toLocaleDateString(),
     dateV:date.toLocaleDateString(),
-    status:'готов',
+    status:'got',
     designer:'Irina',
     questOff: ['Убрать родинки','Убрать мешки','Удаление морщин'],
     questUni:['123','123'],

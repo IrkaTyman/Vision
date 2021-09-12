@@ -7,10 +7,11 @@ import {
 import {createAppContainer} from 'react-navigation';
 import {Text,View,Image} from 'react-native'
 import {FontAwesome} from '@expo/vector-icons'
-import {connect,useSelector, useDispatch} from 'react-redux'
-import {removePerson} from '../redux/action'
+import {connect, useDispatch} from 'react-redux'
+import {removePerson,addNowOrder,addOldOrders} from '../redux/action'
 import {Svg,Path,Circle} from 'react-native-svg'
 import firebase from 'firebase'
+import {addOrdersIdToUser} from '../function/addOrdersIdToUser'
 
 //Stack
 import HomeStack from './homeStack'
@@ -24,23 +25,41 @@ import {styles,fontSizeMain} from '../components/Style'
 import {Home,Cart,Wallet,Support,Question} from '../components/SVG'
 
 
-const Drawer = createDrawerNavigator()
 const DrawerContent = (props) => {
-  const user = useSelector(store => store.register.user)
+  const user = props.user
   const dispatch = useDispatch()
   const db= firebase.database().ref('orders')
 
   const takeNewOrder = () => {
-    console.log(1)
-    db.orderByChild('date').limitToFirst(1).get().then((snap)=>{
-      if(snap.exists()){
-        Object.keys(snap.val()).map((item) => {
-          let order = snap.val()[item]
+    if(!props.nowOrder.client){
+      db.orderByChild('designer').equalTo('').get().then((snap)=>{
+        if(snap.exists()){
+          console.log(snap.val(),1)
+          let date = new Date
+          let timeMin = date.setHours(date.getHours() + 9)
+          let id
+          let order={}
+          Object.keys(snap.val()).map((item) => {
+            if(snap.val()[item].dateComplete < timeMin){
+              timeMin=snap.val()[item].dateComplete
+              id = +item
+              order = snap.val()[item]
+            }
+          })
           order.designer = user.email
-          firebase.database().ref('orders/'+item).set(order)
-        })
-      }
-    }).catch((err)=>console.log(err))
+          order.dateTake = date
+          firebase.database().ref('orders/'+id).set(order)
+          addOrdersIdToUser(user,dispatch,id)
+          dispatch(addNowOrder(order))
+        }
+      }).catch((err)=>console.log(err))
+      props.navigation.navigate('NowOrders')
+    }
+  }
+  const signOut = () => {
+    dispatch(addNowOrder({}))
+    dispatch(addOldOrders([]))
+    dispatch(removePerson('Log out'))
   }
 
   return(
@@ -105,7 +124,7 @@ const DrawerContent = (props) => {
         <DrawerItem
           label='Выйти'
           icon = {() => <FontAwesome name='sign-out' size={fontSizeMain} color='#D25C5C'/>}
-          onPress={() => dispatch(removePerson('Log out'))}
+          onPress={signOut}
           labelStyle = {styles.all}
           style = {styles.logOut}
         />
@@ -116,15 +135,9 @@ const DrawerContent = (props) => {
   )
 }
 
-export const RootDrawerNavigation = (props) => {
-  return(
-    <Drawer.Navigator drawerContent={props => <DrawerContent {...props}/>}>
-      <Drawer.Screen name='Home' component={HomeStack}/>
-      <Drawer.Screen name='NewOrders' component={NewOrdersStack}/>
-      <Drawer.Screen name='NowOrders' component={NowOrdersStack}/>
-      <Drawer.Screen name='OldOrders' component={OldOrdersStack}/>
-      <Drawer.Screen name='BalanceDesigner' component={BalanceStack}/>
-      <Drawer.Screen name='Reference' component={ReferenceStack}/>
-    </Drawer.Navigator>
-  )
-}
+let mapStoreToProps = (store) => ({
+  user:store.register.user,
+  nowOrder:store.register.nowOrder
+})
+
+export default connect(mapStoreToProps)(DrawerContent)
