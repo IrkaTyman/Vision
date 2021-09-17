@@ -12,7 +12,7 @@ import RadioForm, {RadioButton, RadioButtonInput, RadioButtonLabel} from 'react-
 
 import {connect,useDispatch} from 'react-redux'
 import {addNowOrder} from '../redux/action'
-import {styles,colors,newOrderPhotoWidth,fontSizeMain,SCREEN_WIDTH} from '../components/Style'
+import {styles,colors,fontSizeMain,sliderBAWidth,SCREEN_WIDTH} from '../components/Style'
 
  const NewOrders = (props) => {
    const [image,setImage] = useState('')
@@ -25,6 +25,7 @@ import {styles,colors,newOrderPhotoWidth,fontSizeMain,SCREEN_WIDTH} from '../com
    const [allAmount, setAllAmount] = useState(0)
    const [noCompleteOrder,setNoCompleteOrder] = useState(false)
    const [timeOrder,setTimeOrder] = useState(0)
+   const [haveOrder,setHaveOrder] = useState(false)
 
    const dispatch = useDispatch()
    const databaseOrders = firebase.database().ref('orders')
@@ -121,6 +122,9 @@ import {styles,colors,newOrderPhotoWidth,fontSizeMain,SCREEN_WIDTH} from '../com
       } else {
         setNoCompleteOrder(true)
       }
+    } else {
+      setHaveOrder(true)
+      setTimeout(()=>setHaveOrder(false),1000)
     }
   }
 
@@ -149,7 +153,7 @@ import {styles,colors,newOrderPhotoWidth,fontSizeMain,SCREEN_WIDTH} from '../com
        aspect: [4, 3],
      });
      if (!result.cancelled) {
-      setHeight(result.height*newOrderPhotoWidth/result.width)
+      setHeight(result.height*sliderBAWidth/result.width)
       setImage(result.uri);
     }
     setNoCompleteOrder(false)
@@ -157,6 +161,13 @@ import {styles,colors,newOrderPhotoWidth,fontSizeMain,SCREEN_WIDTH} from '../com
    };
     return (
       <ScrollView style={[styles.container,styles.profileWrapper,openWindow ? {height:'100%'} : null]}>
+        {haveOrder
+          ? <View style={styles.alertNewOrderWrapper}>
+              <View style={styles.alertNewOrder}>
+                <Text style={[styles.all,styles.whiteColor,]}>У вас уже есть текущий заказ</Text>
+              </View>
+            </View>
+          : null}
         {openWindow ?
             <Parameters sendParam={paramSend} countAllAmount={countAllAmount} parameters={bodyOrFace == 0 ? props.faceParameters : props.bodyParameters}/>
           :

@@ -11,6 +11,8 @@
   "dependencies": {
     "@expo/ngrok": "^4.1.0",
     "@react-native-async-storage/async-storage": "^1.15.7",
+    "@react-native-firebase/app": "^12.8.0",
+    "@react-native-firebase/storage": "^12.8.0",
     "@react-navigation/drawer": "^5.12.5",
     "@react-navigation/native": "^5.9.4",
     "@react-navigation/stack": "^5.14.5",
@@ -39,7 +41,10 @@
     "react-native-web": "~0.13.12",
     "react-navigation": "^4.4.4",
     "react-redux": "^7.2.4",
-    "redux": "^4.1.0"
+    "redux": "^4.1.0",
+    "expo-file-system": "~11.0.2",
+    "expo-media-library": "~12.0.2",
+    "expo-permissions": "~12.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.14.8",

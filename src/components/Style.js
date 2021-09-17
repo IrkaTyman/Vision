@@ -21,7 +21,7 @@ function fontSizer (screenWidth) {
 export const colors = {
   darkPink:'#A57474',
   red:'#D25C5C',
-  middlePink:'#D25C5C',
+  middlePink:'#D07070',
   lightPink:'#FEC9C9',
   beige:'#F9F6F1',
   darkGreen:'#899B88',
@@ -47,7 +47,7 @@ export const sliderWidth = SCREEN_WIDTH - 32;
 export const itemWidth = slideWidth + itemHorizontalMargin * 2;
 
 export const sliderBAWidth = SCREEN_WIDTH - 4*fontSizeMain
-export const newOrderPhotoWidth = SCREEN_WIDTH - 2*fontSizeMain
+const widthWihtout2Font = SCREEN_WIDTH - 2*fontSizeMain
 
 //STYLE
 export const styles = StyleSheet.create({
@@ -133,7 +133,7 @@ drawerInfo_Ava:{
 logOut:{
     marginTop:fontSizeMain,
     borderTopWidth: 1,
-    borderTopColor:colors.middlePink,
+    borderTopColor:colors.red,
     borderRadius:0,
     paddingTop:fontSizeMain
   },
@@ -350,8 +350,8 @@ sliderBAPhoto:{
   resizeMode:'contain',
 },
 sliderBAArrow:{
-  width:2*fontSizeMain,
-  height:2*fontSizeMain,
+  width:2.3*fontSizeMain,
+  height:2.3*fontSizeMain,
   justifyContent:'center',
   alignItems:'center',
   position:'absolute',
@@ -397,10 +397,10 @@ regPage:{
 },
 regInput:{
   marginBottom:fontSizeMain*2,
-  width:SCREEN_WIDTH - 4*fontSizeMain
+  width:sliderBAWidth
 },
 checksWrap:{
-  width:SCREEN_WIDTH - 4*fontSizeMain,
+  width:sliderBAWidth,
   justifyContent:'space-between',
   flexDirection:'row',
   marginBottom:fontSizeMain*2
@@ -416,11 +416,11 @@ checkWrap:{
 },
 /************ NEW ORDER ***********/
 newOrderPhoto:{
-  width:newOrderPhotoWidth,
+  width:widthWihtout2Font,
   resizeMode:'contain',
 },
 newOrderPicker:{
-  width:newOrderPhotoWidth,
+  width:widthWihtout2Font,
   backgroundColor:colors.lightGrey,
   height:200,
   justifyContent:'center',
@@ -451,5 +451,26 @@ paramMinus:{
   width:1.5*fontSizeMain,
   height:2,
   backgroundColor:colors.red
+},
+alertNewOrderWrapper:{
+  position:'absolute',
+  width:'100%',
+  top:0,
+  bottom:0,
+  backgroundColor:'rgba(255,255,255,0.5)',
+  zIndex:100
+},
+alertNewOrder:{
+  width:widthWihtout2Font,
+  position:'fixed',
+  top:'50%',
+  left:fontSizeMain,
+  backgroundColor:colors.middlePink,
+  paddingHorizontal:fontSizeMain,
+  paddingVertical:2*fontSizeMain,
+  borderRadius:10,
+  zIndex:100,
+  justifyContent:'center',
+  alignItems:'center'
 },
 });

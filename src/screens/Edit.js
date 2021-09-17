@@ -34,16 +34,17 @@ const Edit = (props) => {
      })();
    }, []);
 
-   const submitEditBtn = (data) => {
+   const submitEditBtn = async (data) => {
      const dataUser = data
-
+     let imgSrc = await uploadImageAvatarAsync(image)
      for(let key in props.user){
        if(!dataUser[key] || (dataUser[key] == '' && props.user[key] != '')){
          dataUser[key] = props.user[key]
        }
      }
-     if(image){
-       dataUser.img = image
+     if(imgSrc){
+       console.log(imgSrc)
+       dataUser.img = imgSrc
      }
      let emailStr = dataUser.email.replace('.','')
      dispatch(addPerson(dataUser))
@@ -58,9 +59,27 @@ const Edit = (props) => {
       quality: 1,
     });
     if (!result.cancelled) {
-      setImage(result.uri);    
+      setImage(result.uri);
     }
   };
+  async function uploadImageAvatarAsync(image) {
+    const blob = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function (e) {
+        console.log(e);
+        reject(new TypeError("Network request failed"));
+      };
+      xhr.responseType = "blob";
+      xhr.open("GET", image, true);
+      xhr.send(null);
+    });
+    const ref = firebase.storage().ref(`/users/${props.user.email.replace('.','')}.jpg`);
+    const snapshot = await ref.put(blob);
+    return await snapshot.ref.getDownloadURL();
+  }
  return (
 
      <View style={[styles.container,styles.containerWithoutBlock,]}>

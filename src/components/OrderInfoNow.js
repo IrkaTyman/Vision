@@ -5,6 +5,7 @@ import {styles,fontSizeMain,sliderBAWidth} from './Style';
 import {SliderBA} from '../components/SliderBA'
 import Slider from '../components/slider/Slider'
 import {currencySpelling} from '../function/currencySpelling'
+import {Button} from './Button'
 
 //REDUX
 import {connect,useSelector,useDispatch} from 'react-redux'
@@ -26,7 +27,7 @@ class OrderInfoNow extends Component {
         </View>
         <View style={styles.orderParentHr}/>
         <View style={styles.orderChild}>
-          <SliderBA height={this.state.height} photo={[this.state.data.beforeImg,this.state.data.afterImg]} />
+          <SliderBA height={this.state.height} photo={[this.state.data.beforeImg,this.state.data.afterImg]} userStatus={this.props.user.status} userId={this.state.id}/>
           <View style={styles.orderDescriptGroup}>
             <Text style={[styles.all,styles.orderDescript]}><Text style={[styles.all,styles.orderDescript,styles.bold]}>Создан:</Text> {this.state.dateComplete.toLocaleString()}</Text>
             <Text style={[styles.all,styles.orderDescript]}><Text style={[styles.all,styles.orderDescript,styles.bold]}>Взят в работу:</Text> {this.state.dateTake ? this.state.dateTake.toLocaleString() : '-'}</Text>
