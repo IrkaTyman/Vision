@@ -9,10 +9,10 @@ import {FormInput} from '../components/FormInput'
 import firebase from 'firebase'
 import {addOrdersIdToUser} from '../function/addOrdersIdToUser'
 import RadioForm, {RadioButton, RadioButtonInput, RadioButtonLabel} from 'react-native-simple-radio-button';
-
+import {ChoosePhotoBlock} from '../components/ChoosePhotoBlock'
 import {connect,useDispatch} from 'react-redux'
 import {addNowOrder} from '../redux/action'
-import {styles,colors,fontSizeMain,sliderBAWidth,SCREEN_WIDTH} from '../components/Style'
+import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH} from '../components/Style'
 
  const NewOrders = (props) => {
    const [image,setImage] = useState('')
@@ -74,7 +74,6 @@ import {styles,colors,fontSizeMain,sliderBAWidth,SCREEN_WIDTH} from '../componen
                      value:value
                   }}
                  styleInput = {[styles.all,styles.input,styles.regInput]}
-                 onChangeText={(text) => onChange(text)}
                  value={value}
                />
             )}
@@ -89,20 +88,21 @@ import {styles,colors,fontSizeMain,sliderBAWidth,SCREEN_WIDTH} from '../componen
       })
       param = param.concat(Object.keys(parameters))
       if(image != '' && param!=false){
-        let date = Date.now()
-        if(timeOrder == 0) date+=900000
-        else date += 28800000
+        let dateCreate = Date.now()
+        let dateComplete
+        if(timeOrder == 0) dateComplete= dateCreate+900000
+        else  dateComplete= dateCreate+28800000
         setNoCompleteOrder(false)
         let order = {
           param,
-          dataCreate:new Date(),
+          dateCreate:dateCreate,
           amount:allAmount,
           client: props.user.email,
           status:'inWork',
-          dateComplete:date,
+          dateComplete:dateComplete,
           amountDesigner:0,
           designer:'',
-          height
+          height:height*sliderBAWidth
         }
         databaseOrders.limitToLast(1).get().then(async (snapshot) => {
           if(snapshot.exists()){
@@ -117,7 +117,7 @@ import {styles,colors,fontSizeMain,sliderBAWidth,SCREEN_WIDTH} from '../componen
         }).catch((err) => console.log(err))
         setImage(''),
         setParameters({})
-        setAllAmount(0)
+        setAllAmount('0')
         setAmountUniParam(0)
       } else {
         setNoCompleteOrder(true)
@@ -127,8 +127,7 @@ import {styles,colors,fontSizeMain,sliderBAWidth,SCREEN_WIDTH} from '../componen
       setTimeout(()=>setHaveOrder(false),1000)
     }
   }
-
-  async function uploadImageAsync(image,id) {
+  const uploadImageAsync = async (image,id) => {
     const blob = await new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.onload = function () {
@@ -142,22 +141,17 @@ import {styles,colors,fontSizeMain,sliderBAWidth,SCREEN_WIDTH} from '../componen
       xhr.open("GET", image, true);
       xhr.send(null);
     });
+
     const ref = firebase.storage().ref(`/orders/${id}/${id}-0.jpg`);
-    const snapshot = await ref.put(blob);
+    const snapshot = await ref.put(blob,{contentType:'image/jpeg'});
     return await snapshot.ref.getDownloadURL();
   }
-
-   const pickImage = async () => {
-     let result = await ImagePicker.launchImageLibraryAsync({
-       allowsEditing: true,
-       aspect: [4, 3],
-     });
+   const setImageHandler = (result) => {
      if (!result.cancelled) {
-      setHeight(result.height*sliderBAWidth/result.width)
+      setHeight(result.height/result.width)
       setImage(result.uri);
     }
     setNoCompleteOrder(false)
-
    };
     return (
       <ScrollView style={[styles.container,styles.profileWrapper,openWindow ? {height:'100%'} : null]}>
@@ -167,12 +161,12 @@ import {styles,colors,fontSizeMain,sliderBAWidth,SCREEN_WIDTH} from '../componen
                 <Text style={[styles.all,styles.whiteColor,]}>У вас уже есть текущий заказ</Text>
               </View>
             </View>
-          : null}
-        {openWindow ?
+          :
+        openWindow ?
             <Parameters sendParam={paramSend} countAllAmount={countAllAmount} parameters={bodyOrFace == 0 ? props.faceParameters : props.bodyParameters}/>
           :
         <View>
-        <View style={[styles.profileBlock,{position:'relative'}]}>
+          <View style={[styles.profileBlock,{position:'relative'}]}>
           {noCompleteOrder
             ? <Text style={[styles.all,styles.boldest,styles.redColor,{fontSize:fontSizeMain*0.8,marginBottom:fontSizeMain}]}>
                 Для совершения заказа необходимо указать фото и параметры для обработки
@@ -180,17 +174,29 @@ import {styles,colors,fontSizeMain,sliderBAWidth,SCREEN_WIDTH} from '../componen
             : null}
           <Text style={[styles.all,styles.h3,styles.redColor,styles.bold]}>1. Вставьте фото</Text>
         {image ?
-            <Image source = {{uri:image}} style={[styles.newOrderPhoto,{height:height}]}/>
+            <Image source = {{uri:image}} style={[styles.newOrderPhoto,{height:height*widthWihtout2Font}]}/>
             :
-            <Pressable
-                onPress={pickImage}
-                style={[styles.newOrderPicker]}
-             >
-              <View style={{flexDirection:'row',alignItems:'center'}}>
-                <Ionicons name="camera-outline" size={30} color={colors.red} style={{marginRight:fontSizeMain*0.6}}/>
-                <Text style={[styles.all, styles.redColor,styles.bold]}>Выберете фото</Text>
-              </View>
+            <ChoosePhotoBlock
+                  style={[]}
+                  handler={setImageHandler}/>
+        }
+        {image
+          ? <Pressable
+              hitSlop={100}
+              onPress={()=>{setImage('')}}
+              style={({ pressed }) => [styles.sliderBAArrow,
+                  {
+                    backgroundColor: pressed
+                      ? '#C55454'
+                      : '#D07070',
+                    left:fontSizeMain,
+                    bottom:fontSizeMain,
+                    width:'40%'
+                  }]}
+            >
+            <Text style={[styles.whiteColor,styles.all]}>Удалить</Text>
             </Pressable>
+          : null
         }
         </View>
         <View style={[styles.profileBlock,{position:'relative'}]}>

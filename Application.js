@@ -68,10 +68,12 @@ const Application = (props) => {
             orders.map((item) => {
               firebase.database().ref('orders/'+item).get().then((snap)=>{
                 if(snap.exists()){
-                  if(snap.val().status == 'inWork'||snap.val().status == 'inRating'){
+                  if(snap.val().status != 'inComplete'){
                      dispatch(addNowOrder(snap.val()))
-                  } else oldOrders.push(snap.val())
-                  if(item = orders[orders.length-1]){
+                  } else {
+                    oldOrders.push(snap.val())
+                  }
+                  if(item == orders[orders.length-1]){
                     dispatch(addOldOrders(oldOrders))
                   }
                 }

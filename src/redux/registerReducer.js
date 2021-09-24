@@ -12,7 +12,7 @@ const initialState = {
   faceParameters:{},
   bodyParameters:{},
   nowOrder:{},
-  oldOrders:{}
+  oldOrders:[]
 }
 
 export default function registerReducer(state = initialState,action){

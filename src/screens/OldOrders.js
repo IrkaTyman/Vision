@@ -8,11 +8,11 @@ import {connect,useSelector,useDispatch} from 'react-redux'
 import {actionCreators as actions,addPerson} from '../redux/action'
 import {styles} from '../components/Style'
 
- const OldOrders = ({user,navigation}) => {
+ const OldOrders = ({user,navigation,oldOrders}) => {
     return (
       <ScrollView style={[styles.container,styles.profileWrapper]}>
-        <View style={ordersGot[0] ? styles.ordersBlock : ''}>
-          {ordersGot[0] ? ordersGot.map((item,id) => {
+        <View style={oldOrders[0] ? styles.ordersBlock : ''}>
+          {oldOrders[0] ? oldOrders.map((item,id) => {
             return <OrderInfoOld data={item} id={id} key={id}/>
           }) :
             <View style={styles.notOrder}>
@@ -30,7 +30,8 @@ OldOrders.navigationOptions = {
 };
 
 let mapStoreToProps = (store) => ({
-  user:store.register.user
+  user:store.register.user,
+  oldOrders:store.register.oldOrders
 })
 
 export default connect(mapStoreToProps)(OldOrders)

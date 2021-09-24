@@ -1,6 +1,7 @@
 import {createStackNavigator} from '@react-navigation/stack';
 import {createAppContainer} from 'react-navigation';
 import NowOrders from '../screens/NowOrders';
+import OldOrders from '../screens/OldOrders';
 import Header from '../components/Header'
 import {Order} from '../screens/Order'
 import React from 'react'
@@ -18,6 +19,15 @@ const NowOrdersStack = () => {
         component={NowOrders}
         options={(props) =>
           {return {headerTitle: <Header nav={props.navigation} title="Текущий заказ"/>,
+                    headerStyle:{backgroundColor:'#A57474'},
+                    animationEnabled:false}}
+        }
+      />
+      <Stack.Screen
+        name="OldOrders"
+        component={OldOrders}
+        options={(props) =>
+          {return {headerTitle: <Header nav={props.navigation} title="Готовые заказы"/>,
                     headerStyle:{backgroundColor:'#A57474'},
                     animationEnabled:false}}
         }

@@ -47,7 +47,7 @@ export const sliderWidth = SCREEN_WIDTH - 32;
 export const itemWidth = slideWidth + itemHorizontalMargin * 2;
 
 export const sliderBAWidth = SCREEN_WIDTH - 4*fontSizeMain
-const widthWihtout2Font = SCREEN_WIDTH - 2*fontSizeMain
+export const widthWihtout2Font = SCREEN_WIDTH - 2*fontSizeMain
 
 //STYLE
 export const styles = StyleSheet.create({
@@ -89,6 +89,12 @@ export const styles = StyleSheet.create({
   },
   avaImg:{
     borderRadius:50,
+  },
+  flexRow:{
+    width:fontSizeMain*12,
+    justifyContent:'space-between',
+    alignItems:'center',
+    flexDirection:'row'
   },
   /******************STYLE TEXT***************/
   h3: {
@@ -453,24 +459,31 @@ paramMinus:{
   backgroundColor:colors.red
 },
 alertNewOrderWrapper:{
-  position:'absolute',
   width:'100%',
-  top:0,
-  bottom:0,
+  flex:1,
+  height:SCREEN_WIDTH-80,
   backgroundColor:'rgba(255,255,255,0.5)',
-  zIndex:100
+  justifyContent:'center',
+  alignItems:'center'
 },
 alertNewOrder:{
   width:widthWihtout2Font,
-  position:'fixed',
-  top:'50%',
+  flex:1,
   left:fontSizeMain,
   backgroundColor:colors.middlePink,
   paddingHorizontal:fontSizeMain,
   paddingVertical:2*fontSizeMain,
   borderRadius:10,
-  zIndex:100,
   justifyContent:'center',
+  alignItems:'center'
+},
+statusRatingBlock:{
+  width:'100%',
+  padding:fontSizeMain,
+  backgroundColor:colors.red,
+  opacity:0.7,
+  borderRadius:10,
+  flexDirection:'row',
   alignItems:'center'
 },
 });

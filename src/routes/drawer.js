@@ -34,8 +34,7 @@ const DrawerContent = (props) => {
     if(!props.nowOrder.client){
       db.orderByChild('designer').equalTo('').get().then((snap)=>{
         if(snap.exists()){
-          console.log(snap.val(),1)
-          let date = new Date
+          let date = new Date()
           let timeMin = date.setHours(date.getHours() + 9)
           let id
           let order={}
@@ -47,7 +46,8 @@ const DrawerContent = (props) => {
             }
           })
           order.designer = user.email
-          order.dateTake = date
+          order.dateTake = date.getTime()
+          console.log(order)
           firebase.database().ref('orders/'+id).set(order)
           addOrdersIdToUser(user,dispatch,id)
           dispatch(addNowOrder(order))

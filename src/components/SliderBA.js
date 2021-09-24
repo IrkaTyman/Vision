@@ -6,8 +6,9 @@ import { AntDesign } from '@expo/vector-icons';
 import * as MediaLibrary from 'expo-media-library';
 import * as FileSystem from 'expo-file-system';
 import * as Permissions from 'expo-permissions';
+import {ChoosePhotoBlock} from './ChoosePhotoBlock'
 
-export const SliderBA = ({height,photo,userStatus,userId}) => {
+export const SliderBA = ({orderStatus,handlerDelete,handler,height,photo,userStatus,userId}) => {
   const [index,setIndex] = useState(0);
 
   const toLeafToTheRight = () => {
@@ -35,7 +36,7 @@ export const SliderBA = ({height,photo,userStatus,userId}) => {
         <Text style={[styles.all,styles.whiteColor]}>{index==0 ? 'До' : 'После'}</Text>
       </View>
       <Pressable
-        hitSlop={100}
+        hitSlop={24}
         onPress={toLeafToTheRight}
         style={({ pressed }) => [
             {
@@ -50,21 +51,14 @@ export const SliderBA = ({height,photo,userStatus,userId}) => {
       </Pressable>
       {photo[index]
         ? <Image source={{uri:photo[index]}} style={[styles.sliderBAPhoto,{height:height}]}/>
-        : <Pressable
-            onPress={()=>{}}
-            style={[styles.newOrderPicker,styles.sliderBAPhoto,{height:height}]}
-         >
-          <View style={{flexDirection:'row',alignItems:'center'}}>
-            {userStatus == 'designer'
-              ? <Ionicons name="camera-outline" size={30} color={colors.red} style={{marginRight:fontSizeMain*0.6}}/>
-              : null}
-            <Text style={[styles.all, styles.redColor,styles.bold]}>{userStatus == 'designer' ? 'Выберете фото' : 'Обрабатывается'}</Text>
-          </View>
-        </Pressable>
+        : <ChoosePhotoBlock
+                handler={handler}
+                status={userStatus}
+                style={[styles.sliderBAPhoto,{height:height}]}/>
         }
 
       <Pressable
-        hitSlop={100}
+        hitSlop={24}
         onPress={toLeafToTheRight}
         style={({ pressed }) => [
             {
@@ -79,7 +73,7 @@ export const SliderBA = ({height,photo,userStatus,userId}) => {
       </Pressable>
       {photo[index]
         ? <Pressable
-            hitSlop={100}
+            hitSlop={24}
             onPress={() => downloadFile(photo[index])}
             style={({ pressed }) => [
                 {
@@ -91,6 +85,23 @@ export const SliderBA = ({height,photo,userStatus,userId}) => {
                 },styles.sliderBAArrow]}
           >
             <Ionicons name="ios-download-outline" size={fontSizeMain*1.16} color="#fff" />
+          </Pressable>
+        : null}
+      {index == 1 && photo[index] && userStatus == 'designer' && orderStatus == 'inWork'
+        ? <Pressable
+            hitSlop={24}
+            onPress={handlerDelete}
+            style={({ pressed }) => [styles.sliderBAArrow,
+                {
+                  backgroundColor: pressed
+                    ? '#C55454'
+                    : '#D07070',
+                  left:-0.5*fontSizeMain,
+                  bottom:-0.5*fontSizeMain,
+                  width:'40%'
+                }]}
+          >
+          <Text style={[styles.whiteColor,styles.all]}>Удалить</Text>
           </Pressable>
         : null}
     </View>

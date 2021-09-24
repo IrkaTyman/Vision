@@ -27,10 +27,7 @@ const BalanceDesigner = ({user}) => {
     <ScrollView style={[styles.container,styles.profileWrapper]}>
       <View style={styles.profileBlock}>
         <Text style={[styles.all,styles.h3,styles.bold]}>{`Ваш баланс на ${dateStr.slice(0,10)}`}</Text>
-        <Text style={styles.all}>
-          <Text style={[styles.darkPinkColor,styles.bold]}>{user.balance} </Text>
-          {currencySpelling(user.balance.toString())}
-        </Text>
+        <Text style={[styles.all,styles.darkPinkColor,styles.bold]}>{currencySpelling(user.balance.toString())}</Text>
       </View>
       <View style={styles.profileBlock}>
         <Text style={[styles.all,styles.h3,styles.bold]}>
