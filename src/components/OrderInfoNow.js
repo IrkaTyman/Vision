@@ -1,9 +1,8 @@
 import React, { Component, useState } from "react";
-import { View,Image, TouchableOpacity, Pressable,Text, StyleSheet, LayoutAnimation, Platform, UIManager } from "react-native";
+import { View,Image,Text} from "react-native";
 import { AntDesign } from '@expo/vector-icons';
 import {styles,fontSizeMain,sliderBAWidth,colors} from './Style';
 import {SliderBA} from '../components/SliderBA'
-import Slider from '../components/slider/Slider'
 import {currencySpelling} from '../function/currencySpelling'
 import {Button} from './Button'
 import firebase from 'firebase'
@@ -12,8 +11,7 @@ import {addNowOrder,addOldOrders} from '../redux/action'
 import {FormInput} from './FormInput'
 import {localeStatusOrder} from '../function/localeStatusOrder'
 //REDUX
-import {connect,useSelector,useDispatch} from 'react-redux'
-import {editPerson} from '../redux/action'
+import {connect} from 'react-redux'
 
 class OrderInfoNow extends Component {
   state = {

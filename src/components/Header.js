@@ -4,13 +4,10 @@ import {MaterialIcons} from '@expo/vector-icons'
 import {connect} from 'react-redux'
 
 import {styles} from './Style'
-
 const Header = (props) => {
   const openMenu = () => {
     props.nav.openDrawer();
   }
-
-
   return(
     <View style = {styles.header}>
       <Pressable

@@ -31,7 +31,7 @@ const BalanceDesigner = ({user}) => {
       </View>
       <View style={styles.profileBlock}>
         <Text style={[styles.all,styles.h3,styles.bold]}>
-          Вывод средств
+          {user.status == 'designer' ? 'Вывод средств' : 'Ввод средств'}
           <Text style={styles.redColor}> *</Text>
         </Text>
         <Controller
@@ -54,7 +54,7 @@ const BalanceDesigner = ({user}) => {
                   value:value,
                   keyboardType:'numeric'
                 }}
-                label="Сумма на вывод"
+                label={user.status=='designer' ? "Сумма на вывод" : 'Сумма на ввод'}
                 styleLabel = {[styles.all,styles.labelEdit]}
                 styleInput = {[styles.all,styles.input]}
                 onChangeText={(text) => onChange(text)}
@@ -95,9 +95,17 @@ const BalanceDesigner = ({user}) => {
         />
         <Button onPress={handleSubmit(onSubmitWithdraw)} title={user.status == 'designer' ? 'Вывести' : 'Ввести'} />
         <Text style={[styles.all,styles.darkPinkColor,styles.h3,styles.bold,{marginTop:fontSizeMain}]}>* Условия вывода</Text>
-        <Text style={[styles.all,styles.darkPinkColor, styles.profileInfoText]}>Минимальная сумма для вывода <Text style={styles.bold}>1000</Text> рублей</Text>
-        <Text style={[styles.all,styles.darkPinkColor, styles.profileInfoText]}>Вижены спишутся со счета в момент подачи заявки</Text>
-        <Text style={[styles.all,styles.darkPinkColor, styles.profileInfoText]}>Выплаты производятся каждый четверг <Text style={styles.bold}>до 20:00 по МСК</Text></Text>
+        {user.status == 'designer'
+        ? <View>
+            <Text style={[styles.all,styles.darkPinkColor, styles.profileInfoText]}>Минимальная сумма для вывода <Text style={styles.bold}>1000</Text> рублей</Text>
+            <Text style={[styles.all,styles.darkPinkColor, styles.profileInfoText]}>Вижены спишутся со счета в момент подачи заявки</Text>
+            <Text style={[styles.all,styles.darkPinkColor, styles.profileInfoText]}>Выплаты производятся каждый четверг <Text style={styles.bold}>до 20:00 по МСК</Text></Text>
+          </View>
+        : <View>
+            <Text style={[styles.all,styles.darkPinkColor, styles.profileInfoText]}>Минимальная сумма для ввода <Text style={styles.bold}>100</Text> рублей</Text>
+            <Text style={[styles.all,styles.darkPinkColor, styles.profileInfoText]}>Начисления производятся каждый четверг <Text style={styles.bold}>до 20:00 по МСК</Text></Text>
+          </View>
+      }
       </View>
     </ScrollView>
   )

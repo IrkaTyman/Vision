@@ -28,8 +28,8 @@ export default function registerReducer(state = initialState,action){
           tel:action.payload.tel,
           status:action.payload.status,
           img:action.payload.img != '' ? action.payload.img : imgDefault,
-          balance:0,
-          orders:action.payload.orders
+          balance:action.payload.balance,
+          orders:action.payload.orders || []
         },
         isLogin:true
       }

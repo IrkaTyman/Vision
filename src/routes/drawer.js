@@ -1,4 +1,4 @@
-import React from 'react'
+import React,{useState,useEffect} from 'react'
 import {
   DrawerContentScrollView,
   DrawerItem,
@@ -8,7 +8,7 @@ import {createAppContainer} from 'react-navigation';
 import {Text,View,Image} from 'react-native'
 import {FontAwesome} from '@expo/vector-icons'
 import {connect, useDispatch} from 'react-redux'
-import {removePerson,addNowOrder,addOldOrders} from '../redux/action'
+import {addPerson,removePerson,addNowOrder,addOldOrders} from '../redux/action'
 import {Svg,Path,Circle} from 'react-native-svg'
 import firebase from 'firebase'
 import {addOrdersIdToUser} from '../function/addOrdersIdToUser'
@@ -28,6 +28,7 @@ import {Home,Cart,Wallet,Support,Question} from '../components/SVG'
 const DrawerContent = (props) => {
   const user = props.user
   const dispatch = useDispatch()
+  let [state,setState] = useState(0)
   const db= firebase.database().ref('orders')
 
   const takeNewOrder = () => {
@@ -35,7 +36,7 @@ const DrawerContent = (props) => {
       db.orderByChild('designer').equalTo('').get().then((snap)=>{
         if(snap.exists()){
           let date = new Date()
-          let timeMin = date.setHours(date.getHours() + 9)
+          let timeMin = date.getTime()+32400000
           let id
           let order={}
           Object.keys(snap.val()).map((item) => {
@@ -47,7 +48,6 @@ const DrawerContent = (props) => {
           })
           order.designer = user.email
           order.dateTake = date.getTime()
-          console.log(order)
           firebase.database().ref('orders/'+id).set(order)
           addOrdersIdToUser(user,dispatch,id)
           dispatch(addNowOrder(order))
@@ -137,7 +137,8 @@ const DrawerContent = (props) => {
 
 let mapStoreToProps = (store) => ({
   user:store.register.user,
-  nowOrder:store.register.nowOrder
+  nowOrder:store.register.nowOrder,
+  oldOrders:store.register.oldOrders
 })
 
 export default connect(mapStoreToProps)(DrawerContent)

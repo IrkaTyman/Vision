@@ -8,38 +8,42 @@ import {currencySpelling} from '../function/currencySpelling'
 import {Button} from '../components/Button'
 import firebase from 'firebase'
 import store from '../redux/store'
-import {addNowOrder,addOldOrders} from '../redux/action'
+import {addNowOrder,addOldOrders,withdrawMoney} from '../redux/action'
 import {FormInput} from '../components/FormInput'
 import {localeStatusOrder} from '../function/localeStatusOrder'
+import {getNormalDate} from '../function/getNormalDate'
 //REDUX
 import {connect,useSelector,useDispatch} from 'react-redux'
 
 const NowOrders = (props) => {
   let [rating,setRating] = useState(0)
+  let [state,setState]=useState(0)
   let [noCompleteOrder,setNoCompleteOrder] = useState(false)
   let [noCompulsoryCommets,setNoCompulsoryCommets] = useState(false)
   let [comment,setComment] = useState('')
   let [afterImg,setAfterImg] = useState('')
+  let [nowOrderId,setNowOrder] = useState(props.nowOrder.id-1)
+  let [balanceDesigner,setBalanceDesigner] = useState(props.user.balance)
   let dispatch = useDispatch()
+  let statusOrderRef = firebase.database().ref('orders/' + (props.nowOrder.id-1));
 
-  useEffect(() => {
-    let statusOrderRef = firebase.database().ref('orders/' + (props.nowOrder.id-1));
-    statusOrderRef.on('value', (snapshot) => {
-      let data = snapshot.val()
-      let status = props.nowOrder.status || ''
-      if (data){
-        if(data.status != props.nowOrder.status){
-          console.log(data.status,'status')
-          if(data.status == 'inComplete'){
-            dispatch(addNowOrder({}))
-            let oldOrders = props.oldOrders
-            oldOrders.push(data)
-            dispatch(addOldOrders(oldOrders))
-          } else dispatch(addNowOrder(data))
-
-      }}
-   })},[]
- )
+   /*function timerOrderNow(date){
+     let time=date
+     let hour = Math.floor(time/3600)+''
+     time -= hour*3600
+     let minutes = Math.floor(time/60)+''
+     time-=minutes*60
+     let seconds = Math.floor(time)+''
+     return `${hour.length==2 ? hour : '0'+hour}:${minutes.length==2 ? minutes : '0'+minutes}:${seconds.length==2 ? seconds : '0'+seconds}`
+   }
+   function timeBeforeEndOrder(){
+     console.log(props.nowOrder.dateComplete,'cc')
+     let dateStr = props.nowOrder.dateComplete - Date.now()
+     if(dateStr > 0){
+       setTime(Math.floor(dateStr/1000))
+       setTimeout(timeBeforeEndOrder,2000)
+     }
+   }*/
 
   const setImageHandler = async (result) => {
     if(!result.cancelled) {
@@ -101,11 +105,60 @@ const NowOrders = (props) => {
         dispatch(addNowOrder({}))
         dispatch(addOldOrders(oldOrders))
         databaseOrders.child(order.id-1).set(order)
+        let balanceNew = order.quickly + 20
+        order.rating == 5 ?  balanceNew += 20 : null
+        firebase.database().ref('users/' + order.designer.replace('.','')).get().then((snap)=>{
+          if(snap.exists()){
+            let balance = snap.val().balance+balanceNew
+            firebase.database().ref('users/' + order.designer.replace('.','')).update({balance:balance})
+          }
+        })
         setNoCompulsoryCommets(false)
         setRating(0)
       } else setNoCompulsoryCommets(true)
     } else setNoCompleteOrder(true)
   }
+  const addListener = (id,ref,type) => {
+    deleteListener(ref)
+    let statusRef = ref
+    if(type == 'order'){
+      statusRef.on('value', (snapshot) => {
+        let data = snapshot.val()
+        if (data){
+          if(data.status != props.nowOrder.status){
+            if(data.status == 'inComplete'){
+              let oldOrders = props.oldOrders
+              if(oldOrders[oldOrders.length-1].id != data.id){
+                oldOrders.push(data)
+                dispatch(addOldOrders(oldOrders))
+              }
+              dispatch(addNowOrder({}))
+            } else {
+              dispatch(addNowOrder(data))
+            }}
+        }
+     })}
+    else {
+      statusRef.on('value',(snap) => {
+        let data = snap.val()
+        dispatch(withdrawMoney(data))
+      })
+    }
+  }
+  const deleteListener = (ref) => {
+    let statusRef = ref
+    statusRef.off()
+  }
+  if(nowOrderId != props.nowOrder.id){
+    addListener(props.nowOrder.id-1,firebase.database().ref('orders/' + (props.nowOrder.id-1)),'order')
+    setNowOrder(props.nowOrder.id)
+    state == 0 ? setState(1) : setState(0)
+  }
+  if(props.user.status == 'designer' && balanceDesigner != 1000){
+    setBalanceDesigner(1000)
+    addListener('',firebase.database().ref('users/' + props.user.email.replace('.','') + '/balance'),'user')
+  }
+
   return (
       <ScrollView style={styles.container}>
       {!props.nowOrder.client ?
@@ -134,10 +187,16 @@ const NowOrders = (props) => {
             userStatus={props.user.status}
             userId={props.nowOrder.id}
             orderStatus={props.nowOrder.status}/>
+
           <View style={styles.orderDescriptGroup}>
-            <Text style={[styles.all,styles.orderDescript]}><Text style={[styles.all,styles.orderDescript,styles.bold]}>Создан:</Text> {(new Date(props.nowOrder.dateCreate)).toLocaleString()}</Text>
-            <Text style={[styles.all,styles.orderDescript]}><Text style={[styles.all,styles.orderDescript,styles.bold]}>Взят в работу:</Text> {props.nowOrder.dateTake ? (new Date(props.nowOrder.dateTake)).toLocaleString() : '-'}</Text>
-            <Text style={[styles.all,styles.orderDescript,styles.bold]}>Статус:<Text style={{color:'green'}}> {localeStatusOrder(props.nowOrder.status)}</Text></Text>
+            <Text style={[styles.all,styles.orderDescript,styles.redColor,styles.bold,{fontSize:fontSizeMain*1.2}]}><Text style={{fontSize:fontSizeMain}}>Выполнить до:</Text> {getNormalDate(props.nowOrder.dateComplete)}</Text>
+            <Text style={[styles.all,styles.orderDescript]}><Text style={[styles.all,styles.orderDescript,styles.bold]}>Взят в работу:</Text> {props.nowOrder.dateTake ? getNormalDate(props.nowOrder.dateTake) : '-'}</Text>
+            <Text style={[styles.all,styles.orderDescript,styles.bold]}>
+              Статус:
+              <Text style={{color:'green'}}>
+                {localeStatusOrder(props.nowOrder.status)}
+              </Text>
+            </Text>
           </View>
           <View style={styles.orderDescriptGroup}>
             <Text style={[styles.all,styles.orderDescript,styles.bold]}>Задание:</Text>
@@ -179,7 +238,26 @@ const NowOrders = (props) => {
             : null
           }
           <View style={styles.orderDescriptGroup}>
-            <Text style={[styles.all,styles.orderDescript]}><Text style={[styles.all,styles.orderDescript,styles.bold]}>{props.user.status == 'client' ? 'Вы заплатили: ' : 'Вы заработаете: '} </Text>{props.user.status == 'client'? currencySpelling(props.nowOrder.amount) : '20 виженов'}</Text>
+            {props.user.status == 'client'
+              ? <Text style={[styles.all,styles.orderDescript]}>
+                  <Text style={[styles.all,styles.orderDescript,styles.bold]}>Вы заплатили: </Text>
+                  {currencySpelling(props.nowOrder.amount)}
+                </Text>
+              : <View>
+                  <Text style={[styles.all,styles.orderDescript]}>
+                    <Text style={[styles.all,styles.orderDescript,styles.bold]}>Бонус за 5 звезд: </Text>
+                    20 виженов
+                  </Text>
+                  <Text style={[styles.all,styles.orderDescript]}>
+                    <Text style={[styles.all,styles.orderDescript,styles.bold]}>Бонус за срочность: </Text>
+                    15 виженов
+                  </Text>
+                  <Text style={[styles.all,styles.orderDescript]}>
+                    <Text style={[styles.all,styles.orderDescript,styles.bold]}>Вы получите: </Text>
+                    {currencySpelling(20 + props.nowOrder.quickly)}
+                  </Text>
+                </View>
+              }
           </View>
           {noCompleteOrder && props.user.status == 'client'
             ? <Text style={[styles.all,styles.boldest,styles.redColor,{fontSize:fontSizeMain*0.8,marginBottom:fontSizeMain}]}>

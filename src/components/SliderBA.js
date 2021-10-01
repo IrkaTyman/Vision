@@ -5,16 +5,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { AntDesign } from '@expo/vector-icons';
 import * as MediaLibrary from 'expo-media-library';
 import * as FileSystem from 'expo-file-system';
-import * as Permissions from 'expo-permissions';
 import {ChoosePhotoBlock} from './ChoosePhotoBlock'
 
 export const SliderBA = ({orderStatus,handlerDelete,handler,height,photo,userStatus,userId}) => {
   const [index,setIndex] = useState(0);
-
   const toLeafToTheRight = () => {
     setIndex((index+1)%2)
   }
-
   const downloadFile = (uri) => {
     const fileUri = FileSystem.documentDirectory + `${userId}-${index}.jpg`;
     FileSystem.downloadAsync(uri, fileUri)
@@ -25,7 +22,6 @@ export const SliderBA = ({orderStatus,handlerDelete,handler,height,photo,userSta
         console.error(error);
       })
   }
-
   const saveFile = async (fileUri: string) => {
     const asset = await MediaLibrary.createAssetAsync(fileUri)
     await MediaLibrary.createAlbumAsync("Fotou", asset, false)

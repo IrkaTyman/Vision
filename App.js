@@ -7,6 +7,7 @@ import firebase from 'firebase'
 import {createStore} from 'redux'
 import {Provider} from 'react-redux'
 import {rootReducer} from './src/redux/rootReducer'
+import {addFaceParameters,addBodyParameters} from './src/redux/action'
 
 
 const store = createStore(rootReducer)
@@ -29,7 +30,6 @@ export default class App extends React.Component {
     super(props)
     this.state = {
       isOpen:false,
-      data:{}
       }
   }
 
@@ -52,10 +52,25 @@ export default class App extends React.Component {
     this._loadAsync()
   }
 
+  setParametersForOrder(){
+    let db = firebase.firestore()
+    db.collection('faceParameters').get().then((param) => {
+      param.forEach((doc) => {
+        store.dispatch(addFaceParameters(doc.data()))
+      });
+    })
+    db.collection('bodyParameters').get().then((param) => {
+      param.forEach((doc) => {
+        store.dispatch(addBodyParameters(doc.data()))
+      });
+    })
+  }
+
   //FONT
   async _loadAsync() {
     try {
       await Font.loadAsync(customFonts);
+      this.setParametersForOrder()
     } catch(e) {
       console.warn(e)
     } finally {

@@ -461,15 +461,13 @@ paramMinus:{
 alertNewOrderWrapper:{
   width:'100%',
   flex:1,
-  height:SCREEN_WIDTH-80,
-  backgroundColor:'rgba(255,255,255,0.5)',
+  height:SCREEN_HEIGHT-80,
+  backgroundColor:colors.darkBeige,
   justifyContent:'center',
   alignItems:'center'
 },
 alertNewOrder:{
   width:widthWihtout2Font,
-  flex:1,
-  left:fontSizeMain,
   backgroundColor:colors.middlePink,
   paddingHorizontal:fontSizeMain,
   paddingVertical:2*fontSizeMain,

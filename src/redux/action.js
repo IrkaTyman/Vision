@@ -1,11 +1,9 @@
 export const addPerson = ({email,username,surname,password,tel,status,img,balance, orders}) => {
   return {type:'register/add_person', payload:{email,username,surname,password,tel,status,img,balance, orders}}
 }
-
 export const withdrawMoney = (balance) => {
  return {type:'register/withdraw_money', payload:balance}
 }
-
 export const removePerson = (desc) => {
   return {type:'register/remove_person', payload:{desc}}
 }

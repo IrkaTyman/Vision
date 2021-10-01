@@ -19,7 +19,8 @@ const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"
 const TEL_REGEX =/^((8|\+?7)[\- ]?)(\(?\d{3}\)?[\- ]?)[\d\- ]{7}$/;
 
 const Edit = (props) => {
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState('');
+  const [state, setState] = useState(0)
   const { control, handleSubmit, formState: { errors } } = useForm();
   const dispatch = useDispatch();
 
@@ -36,18 +37,21 @@ const Edit = (props) => {
 
    const submitEditBtn = async (data) => {
      const dataUser = data
-     let imgSrc = await uploadImageAvatarAsync(image)
+     let imgSrc
+     if(image){
+       imgSrc = await uploadImageAvatarAsync(image)
+     }
+     else imgSrc = props.user.img
      for(let key in props.user){
        if(!dataUser[key] || (dataUser[key] == '' && props.user[key] != '')){
          dataUser[key] = props.user[key]
        }
      }
-     if(imgSrc){
-       console.log(imgSrc)
-       dataUser.img = imgSrc
-     }
+     dataUser.img = imgSrc
      let emailStr = dataUser.email.replace('.','')
      dispatch(addPerson(dataUser))
+     setImage('')
+     state == 0 ? setState(1) : setState(0)
      firebase.database().ref('users/' + emailStr).set(dataUser);
    }
 
@@ -77,11 +81,10 @@ const Edit = (props) => {
       xhr.send(null);
     });
     const ref = firebase.storage().ref(`/users/${props.user.email.replace('.','')}.jpg`);
-    const snapshot = await ref.put(blob);
+    const snapshot = await ref.put(blob,{contentType:'image/jpeg'});
     return await snapshot.ref.getDownloadURL();
   }
  return (
-
      <View style={[styles.container,styles.containerWithoutBlock,]}>
        <View style={styles.editNameOrSurnameOrImgWrapper}>
          <View style={{position:'relative'}}>

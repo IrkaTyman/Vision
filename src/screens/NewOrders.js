@@ -3,7 +3,7 @@ import {Image, Text, View, ScrollView, Pressable,Platform} from 'react-native';
 import {Button} from '../components/Button'
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
-import {Parameters} from '../components/newOrder/Parameters'
+import {Parameters} from '../components/Parameters'
 import { useForm, Controller } from "react-hook-form";
 import {FormInput} from '../components/FormInput'
 import firebase from 'firebase'
@@ -11,7 +11,7 @@ import {addOrdersIdToUser} from '../function/addOrdersIdToUser'
 import RadioForm, {RadioButton, RadioButtonInput, RadioButtonLabel} from 'react-native-simple-radio-button';
 import {ChoosePhotoBlock} from '../components/ChoosePhotoBlock'
 import {connect,useDispatch} from 'react-redux'
-import {addNowOrder} from '../redux/action'
+import {addNowOrder,addPerson} from '../redux/action'
 import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH} from '../components/Style'
 
  const NewOrders = (props) => {
@@ -26,6 +26,14 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
    const [noCompleteOrder,setNoCompleteOrder] = useState(false)
    const [timeOrder,setTimeOrder] = useState(0)
    const [haveOrder,setHaveOrder] = useState(false)
+   const [havingMoney,setHavingMoney] = useState(true)
+   const [input,setInput] = useState({})
+
+
+
+   const _handleChange = (key,text) => {
+     setInput({ ...input, [key]: text });
+    };
 
    const dispatch = useDispatch()
    const databaseOrders = firebase.database().ref('orders')
@@ -61,30 +69,12 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
     setAllAmount(amount)
     return amount
   }
-  const addUniParamFields = (amountUniParam) => {
-    amountUniParam.push(<Controller
-            name={'param' + i}
-            defaultValue=""
-            control={control}
-            render={({ field: { onChange, value } }) => (
-              <FormInput
-                  options={{
-                     placeholder:'Ваш параметр',
-                     onChangeText:(text) => onChange(text),
-                     value:value
-                  }}
-                 styleInput = {[styles.all,styles.input,styles.regInput]}
-                 value={value}
-               />
-            )}
-          />)
-  }
-  const completeOrders = async (data) => {
-    if(!props.nowOrder.client){
+  const completeOrders = async () => {
+    if(!props.nowOrder.client && props.user.balance > allAmount-1){
       let param = []
       let id
-      Object.keys(data).map((item) => {
-        param.push(data[item])
+      Object.keys(input).map((item) => {
+        param.push(input[item])
       })
       param = param.concat(Object.keys(parameters))
       if(image != '' && param!=false){
@@ -102,8 +92,13 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
           dateComplete:dateComplete,
           amountDesigner:0,
           designer:'',
-          height:height*sliderBAWidth
+          height:height*sliderBAWidth,
+          quickly:timeOrder == 0 ? 15 : 0
         }
+        let user = props.user
+        user.balance -= allAmount
+        dispatch(addPerson(user))
+        firebase.database().ref('users/' + user.email.replace('.','')).set(user);
         databaseOrders.limitToLast(1).get().then(async (snapshot) => {
           if(snapshot.exists()){
             id = +Object.keys(snapshot.val())[0]+1
@@ -117,11 +112,15 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
         }).catch((err) => console.log(err))
         setImage(''),
         setParameters({})
-        setAllAmount('0')
+        setAllAmount(0)
+        setInput({})
         setAmountUniParam(0)
       } else {
         setNoCompleteOrder(true)
       }
+    } else if(props.user.balance < allAmount){
+      setHavingMoney(false)
+      setTimeout(()=>setHavingMoney(true),1000)
     } else {
       setHaveOrder(true)
       setTimeout(()=>setHaveOrder(false),1000)
@@ -154,15 +153,15 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
     setNoCompleteOrder(false)
    };
     return (
-      <ScrollView style={[styles.container,styles.profileWrapper,openWindow ? {height:'100%'} : null]}>
-        {haveOrder
-          ? <View style={styles.alertNewOrderWrapper}>
-              <View style={styles.alertNewOrder}>
-                <Text style={[styles.all,styles.whiteColor,]}>У вас уже есть текущий заказ</Text>
-              </View>
+      haveOrder || !havingMoney
+        ? <View style={[styles.alertNewOrderWrapper]}>
+            <View style={styles.alertNewOrder}>
+              <Text style={[styles.all,styles.whiteColor,]}>У вас {haveOrder ? 'уже есть текущий заказ' : 'недостаточно средств'}</Text>
             </View>
-          :
-        openWindow ?
+          </View>
+        :
+      <ScrollView style={[styles.container,styles.profileWrapper,openWindow ? {height:'100%'} : null]}>
+        {openWindow ?
             <Parameters sendParam={paramSend} countAllAmount={countAllAmount} parameters={bodyOrFace == 0 ? props.faceParameters : props.bodyParameters}/>
           :
         <View>
@@ -235,23 +234,14 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
           {[...Array(amountUniParam)].map((item,i) => {
             return(
               <View key = {i} style={[styles.bodyOrFaceWrap]}>
-                <Controller
-                      name={'param' + i}
-                      defaultValue=""
-                      control={control}
-                      render={({ field: { onChange, value } }) => (
-                        <FormInput
-                            options={{
-                               placeholder:'Ваш параметр',
-                               onChangeText:(text) => onChange(text),
-                               value:value
-                            }}
-                           styleInput = {[styles.all,styles.input,{marginBottom:0,width:SCREEN_WIDTH-4.5*fontSizeMain}]}
-                           onChangeText={(text) => onChange(text)}
-                           value={value}
-                         />
-                      )}
-                    />
+                  <FormInput
+                      options={{
+                         placeholder:'Ваш параметр',
+                         onChangeText:(text) => _handleChange(`param${i}`,text),
+                         value:input[`param${i}`]
+                      }}
+                     styleInput = {[styles.all,styles.input,{marginBottom:0,width:SCREEN_WIDTH-4.5*fontSizeMain}]}
+                   />
                   <Pressable onPress={() => setAmountUniParam(amountUniParam-1)}>
                     <View style={[styles.paramMinus,{marginLeft:fontSizeMain}]}></View>
                   </Pressable>
@@ -287,7 +277,6 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
           <Button title='Начать обработку' onPress={handleSubmit(completeOrders)}/>
         </View>
       </View>}
-
       </ScrollView>
     );
 };
@@ -300,6 +289,7 @@ let mapStoreToProps = (store) => ({
   user:store.register.user,
   noCompleteOrder:store.register.noCompleteOrder,
   nowOrder:store.register.nowOrder,
+  oldOrders:store.register.oldOorders,
   faceParameters:store.register.faceParameters,
   bodyParameters:store.register.bodyParameters
 })

@@ -1,12 +1,10 @@
 import React, { Component } from 'react';
-import {View, ScrollView,Text} from 'react-native';
-import Carousel, { Pagination } from 'react-native-snap-carousel';
+import {View, ScrollView} from 'react-native';
+import Carousel from 'react-native-snap-carousel';
 import {styles,sliderWidth,itemWidth} from '../Style';
-import { ENTRIES1} from '../static/entries';
-import SliderEntry from './components/SliderEntry'
-
-export default class Slider extends Component {
-
+import SliderEntry from './SliderEntry'
+import {connect} from 'react-redux'
+class Slider extends Component {
     constructor (props) {
         super(props);
         this.state = {
@@ -20,14 +18,13 @@ export default class Slider extends Component {
             />
         );
     }
-
     mainExample (number, title) {
         const { slider1ActiveSlide } = this.state;
         return (
             <View>
                 <Carousel
                   ref={c => this._slider1Ref = c}
-                  data={this.props.data || ENTRIES1}
+                  data={this.props.oldOrders}
                   renderItem={this._renderItem}
                   sliderWidth={sliderWidth}
                   itemWidth={itemWidth}
@@ -47,15 +44,20 @@ export default class Slider extends Component {
     render () {
         const example1 = this.mainExample();
         return (
-                <View >
-                    <ScrollView
+                <ScrollView
                       style={styles.scrollview}
                       scrollEventThrottle={200}
                       directionalLockEnabled={true}
                     >
                         { example1 }
-                    </ScrollView>
-                </View>
+                </ScrollView>
         );
     }
 }
+
+
+let mapStoreToProps = (store) => ({
+  oldOrders:store.register.oldOrders
+})
+
+export default connect(mapStoreToProps)(Slider)

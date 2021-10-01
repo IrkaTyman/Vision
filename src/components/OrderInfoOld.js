@@ -1,14 +1,14 @@
 import React, { Component} from "react";
-import { View,Image, TouchableOpacity, Text, StyleSheet, LayoutAnimation, Platform, UIManager } from "react-native";
+import { View,Image, TouchableOpacity, Text, Platform,LayoutAnimation,UIManager} from "react-native";
 import { AntDesign } from '@expo/vector-icons';
 import {styles,fontSizeMain,sliderBAWidth} from './Style';
 import {SliderBA} from '../components/SliderBA'
 import {currencySpelling} from '../function/currencySpelling'
+import {getNormalDate} from '../function/getNormalDate'
 import {localeStatusOrder} from '../function/localeStatusOrder'
 
 //REDUX
 import {connect,useSelector,useDispatch} from 'react-redux'
-import {editPerson} from '../redux/action'
 
 class OrderInfoOld extends Component {
   state = {
@@ -22,22 +22,17 @@ class OrderInfoOld extends Component {
     if (Platform.OS === 'android') {
       UIManager.setLayoutAnimationEnabledExperimental(true);
     }
-    ///Image.getSize(this.state.data.beforeImg,(width,height) =>{
-    //  this.setState({...this.state,height:height*sliderBAWidth/width})
-    //})
   }
-
   toggleExpand = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     this.setState({...this.state,expanded:!this.state.expanded})
   }
-
   render(){
     return (
       <View>
         <TouchableOpacity style={[styles.orderRow,{borderBottomLeftRadius:!this.state.expanded ? 10 : 0,borderBottomRightRadius:!this.state.expanded ? 10 : 0}]} onPress={()=>this.toggleExpand()}>
           <Text style={[styles.whiteColor, styles.all]}>{this.state.id+1+'.'}</Text>
-          <Text style={[styles.whiteColor, styles.all]}>{(new Date(this.state.data.dateCreate)).toLocaleString()}</Text>
+          <Text style={[styles.whiteColor, styles.all]}>{getNormalDate(this.state.data.dateCreate,false,true)}</Text>
           <AntDesign name={this.state.expanded ? 'up' :  'down'} size={fontSizeMain} color="#fff" />
         </TouchableOpacity>
         <View style={styles.orderParentHr}/>
@@ -46,8 +41,8 @@ class OrderInfoOld extends Component {
         <View style={styles.orderChild}>
           <SliderBA photo={[this.state.data.beforeImg,this.state.data.afterImg]} height={this.state.height}/>
           <View style={styles.orderDescriptGroup}>
-            <Text style={[styles.all,styles.orderDescript]}><Text style={[styles.all,styles.bold]}>Взят в работу:</Text> {(new Date(this.state.data.dateTake)).toLocaleString()}</Text>
-            <Text style={[styles.all,styles.orderDescript]}><Text style={[styles.all,styles.bold]}>Завершен:</Text> {(new Date(this.state.data.dateComplete)).toLocaleString()}</Text>
+            <Text style={[styles.all,styles.orderDescript]}><Text style={[styles.all,styles.bold]}>Взят в работу:</Text> {getNormalDate(this.state.data.dateTake)}</Text>
+            <Text style={[styles.all,styles.orderDescript]}><Text style={[styles.all,styles.bold]}>Завершен:</Text> {getNormalDate(this.state.data.dateComplete)}</Text>
             <Text style={[styles.all,styles.orderDescript,styles.bold]}>Статус:<Text style={{color:'green'}}> {localeStatusOrder(this.state.data.status)}</Text></Text>
           </View>
           <View style={styles.orderDescriptGroup}>

@@ -8,7 +8,7 @@ import {addPerson} from '../redux/action'
 import {styles} from '../components/Style'
 import {currencySpelling} from '../function/currencySpelling'
 
- const Home = ({user,navigation}) => {
+ const Home = ({user,navigation,oldOrders}) => {
     return (
       <ScrollView style={[styles.container,styles.profileWrapper]}>
         <View style={styles.profileBlock}>
@@ -25,9 +25,13 @@ import {currencySpelling} from '../function/currencySpelling'
           </View>
           <Button title='Редактировать' onPress={() => navigation.navigate('Edit')}/>
         </View>
-        <Pressable style={styles.profileBlock} onPress={()=>{navigation.navigate('OldPhoto')}}>
-          <Text style={[styles.all,styles.h3]}>Готовые фото <Text style={styles.darkPinkColor}>10</Text></Text>
-          <Slider/>
+        <Pressable style={styles.profileBlock} onPress={()=>{}}>
+          <Text style={[styles.all,styles.h3]}>Готовые фото <Text style={styles.darkPinkColor}>{oldOrders.length}</Text></Text>
+          {oldOrders.length > 0
+            ? <Slider/>
+            : <Text style={[styles.all,styles.bold,styles.darkPinkColor]}>
+                Пока здесь ничего нет
+              </Text>}
         </Pressable>
       </ScrollView>
     );
@@ -38,7 +42,8 @@ Home.navigationOptions = {
 };
 
 let mapStoreToProps = (store) => ({
-  user:store.register.user
+  user:store.register.user,
+  oldOrders:store.register.oldOrders
 })
 
 export default connect(mapStoreToProps)(Home)

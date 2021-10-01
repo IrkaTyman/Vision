@@ -1,13 +1,12 @@
 import React,{useState} from 'react'
 import {Button} from '../Button'
 import {FormInput} from '../FormInput'
-import {Text, View} from 'react-native';
+import {View} from 'react-native';
 import {styles,fontSizeMain} from '../Style'
 import { useForm, Controller } from "react-hook-form";
 import {addPerson} from '../../redux/action'
-import {connect,useSelector,useDispatch} from 'react-redux'
-import RadioForm, {RadioButton, RadioButtonInput, RadioButtonLabel} from 'react-native-simple-radio-button';
-
+import {connect} from 'react-redux'
+import RadioForm, {RadioButton, RadioButtonInput} from 'react-native-simple-radio-button';
 export const LogUp = (props) => {
   const { control, handleSubmit, formState: { errors } } = useForm();
   const designer = props.designer
@@ -147,9 +146,7 @@ export const LogUp = (props) => {
           ))
         }
       </RadioForm>
-
       <Button onPress={handleSubmit((data) => props.submit(data,designer))} title="Зарегистрироваться" />
-
     </View>
   )
 }
