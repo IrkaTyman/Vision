@@ -45,7 +45,7 @@ class Slider extends Component {
         const example1 = this.mainExample();
         return (
                 <ScrollView
-                      style={styles.scrollview}
+                      style={styles.flex}
                       scrollEventThrottle={200}
                       directionalLockEnabled={true}
                     >

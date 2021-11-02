@@ -11,7 +11,7 @@ export const Button = (props) => {
             backgroundColor: pressed
               ? '#C55454'
               : '#D07070'
-          },styles.button,props.style]}
+          },styles.button,styles.ai_c,props.style]}
     >
         <Text style={[styles.whiteColor,styles.all]}>{props.title}</Text>
     </Pressable>

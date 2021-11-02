@@ -6,7 +6,6 @@ import Header from '../components/Header'
 import React from 'react'
 import {Text} from 'react-native'
 import {fontSizeMain,styles} from '../components/Style'
-import {Order} from '../screens/Order'
 
 const Stack = createStackNavigator()
 

@@ -1,5 +1,5 @@
-export const addPerson = ({email,username,surname,password,tel,status,img,balance, orders}) => {
-  return {type:'register/add_person', payload:{email,username,surname,password,tel,status,img,balance, orders}}
+export const addPerson = (obj) => {
+  return {type:'register/add_person', payload:obj}
 }
 export const withdrawMoney = (balance) => {
  return {type:'register/withdraw_money', payload:balance}
@@ -24,4 +24,16 @@ export const addNowOrder = (object) => {
 }
 export const addOldOrders = (array) => {
   return {type:'register/add_old_orders', payload:array}
+}
+export const addAllOrders = (array) => {
+  return {type:'register/add_all_orders', payload:array}
+}
+export const addAllST = (object) => {
+  return {type:'register/add_all_something', payload:object}
+}
+export const changeIndexImgGallery = (page) => {
+  return {type:'register/set_index_img_gallery', payload:page}
+}
+export const changeCountImgInGallery = (page) => {
+  return {type:'register/set_count_img_in_ gallery', payload:page}
 }

@@ -2,6 +2,7 @@ import {createStackNavigator} from '@react-navigation/stack';
 import {createAppContainer} from 'react-navigation';
 import Edit from '../screens/Edit';
 import BalanceDesigner from '../screens/balance/BalanceDesigner';
+import BalanceClient from '../screens/balance/BalanceClient';
 import Header from '../components/Header'
 import React from 'react'
 import {Text} from 'react-native'

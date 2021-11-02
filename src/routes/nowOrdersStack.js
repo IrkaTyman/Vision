@@ -3,7 +3,6 @@ import {createAppContainer} from 'react-navigation';
 import NowOrders from '../screens/NowOrders';
 import OldOrders from '../screens/OldOrders';
 import Header from '../components/Header'
-import {Order} from '../screens/Order'
 import React from 'react'
 import Edit from '../screens/Edit';
 import {Text} from 'react-native'

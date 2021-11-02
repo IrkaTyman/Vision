@@ -98,6 +98,7 @@ const NowOrders = (props) => {
       if(rating < 4 && comment != '' || rating > 3){
         const databaseOrders = firebase.database().ref('orders')
         const oldOrders = props.oldOrders || []
+        order.rating == 5 ?  order.amountDesigner += 20 : null
         order.comment = comment
         order.rating=rating
         order.status='inComplete'
@@ -105,12 +106,10 @@ const NowOrders = (props) => {
         dispatch(addNowOrder({}))
         dispatch(addOldOrders(oldOrders))
         databaseOrders.child(order.id-1).set(order)
-        let balanceNew = order.quickly + 20
-        order.rating == 5 ?  balanceNew += 20 : null
-        firebase.database().ref('users/' + order.designer.replace('.','')).get().then((snap)=>{
+        firebase.database().ref('users/' + order.designerUID).get().then((snap)=>{
           if(snap.exists()){
-            let balance = snap.val().balance+balanceNew
-            firebase.database().ref('users/' + order.designer.replace('.','')).update({balance:balance})
+            let balance = snap.val().balance+order.amountDesigner
+            firebase.database().ref('users/' + order.designerUID).update({balance:order.amountDesigner})
           }
         })
         setNoCompulsoryCommets(false)
@@ -128,9 +127,12 @@ const NowOrders = (props) => {
           if(data.status != props.nowOrder.status){
             if(data.status == 'inComplete'){
               let oldOrders = props.oldOrders
+              let allVisibleImg = props.allVisibleImgInGallery
               if(oldOrders[oldOrders.length-1].id != data.id){
                 oldOrders.push(data)
+                allVisibleImg[oldOrders.length-1] = data.afterImg
                 dispatch(addOldOrders(oldOrders))
+                dispatch(changeCountImgInGallery(allVisibleImg))
               }
               dispatch(addNowOrder({}))
             } else {
@@ -156,20 +158,20 @@ const NowOrders = (props) => {
   }
   if(props.user.status == 'designer' && balanceDesigner != 1000){
     setBalanceDesigner(1000)
-    addListener('',firebase.database().ref('users/' + props.user.email.replace('.','') + '/balance'),'user')
+    addListener('',firebase.database().ref('users/' + props.user.uid + '/balance'),'user')
   }
-
   return (
       <ScrollView style={styles.container}>
-      {!props.nowOrder.client ?
-        <View style={styles.notOrder}>
+      {!props.nowOrder.clientUID ?
+        <View style={[styles.notOrder,styles.flex,styles.ai_c,styles.jc_c]}>
           <Text style={[styles.all,styles.bold,styles.darkPinkColor]}>
             Пока здесь ничего нет
           </Text>
         </View>
       :
-      <View style={styles.ordersBlock}>
-        <View style={[styles.orderRow,{borderBottomLeftRadius: 0,borderBottomRightRadius:0,justifyContent:'center'}]}>
+      <View style={styles.p_fsm}>
+        <View style={[styles.orderRow,styles.p_fsm,styles.fd_r,
+                      styles.ai_c,styles.jc_c,{borderBottomLeftRadius: 0,borderBottomRightRadius:0}]}>
           <Text style={[styles.whiteColor, styles.all]}>Заказ №{props.nowOrder.id}</Text>
         </View>
         <View style={styles.orderParentHr}/>
@@ -207,7 +209,7 @@ const NowOrders = (props) => {
           {props.nowOrder.status == 'inRating'
             ? <View>
                 <Text style={[styles.all,styles.orderDescript,styles.bold]}>Ваша оценка:</Text>
-                <View style={[styles.flexRow,{marginBottom:fontSizeMain*1.5}]}>
+                <View style={[styles.starsRow,styles.fd_r,styles.ai_c,styles.jc_sb,{marginBottom:fontSizeMain*1.5}]}>
                   {[...Array(5)].map((item,id) => {
                       if(props.user.status == 'client'){
                         return(
@@ -272,7 +274,7 @@ const NowOrders = (props) => {
           {props.user.status == 'designer'
             ? props.nowOrder.status == 'inWork'
               ? <Button title='Отправить' onPress={completeOrders}/>
-              : <View style={styles.statusRatingBlock}>
+              : <View style={[styles.statusRatingBlock,styles.p_fsm,styles.ai_c,styles.fd_r]}>
                   <Text style={[styles.whiteColor,styles.all]}>На оценке</Text>
                 </View>
             : props.nowOrder.status == 'inRating'

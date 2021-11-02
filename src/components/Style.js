@@ -10,9 +10,9 @@ export const fontSizeMain = fontSizer(SCREEN_WIDTH)
 
 //func for STYLE
 function fontSizer (screenWidth) {
-  if(screenWidth > 400){
+  if(screenWidth > 600){
     return 18;
-  }else if(screenWidth > 320){
+  }else if(screenWidth > 400){
     return 16;
   }else {
     return 14;
@@ -51,6 +51,7 @@ export const widthWihtout2Font = SCREEN_WIDTH - 2*fontSizeMain
 
 //STYLE
 export const styles = StyleSheet.create({
+  /************* CONTAINER ***********/
   container: {
     flex: 1,
     backgroundColor:'#F7EDDA'
@@ -58,6 +59,37 @@ export const styles = StyleSheet.create({
   containerWithoutBlock:{
     padding:fontSizeMain,
   },
+  button: {
+    paddingVertical: fontSizeMain*0.6 ,
+    paddingHorizontal:fontSizeMain*1.5,
+    minWidth:100,
+    borderRadius: 10,
+    fontSize:0.875 * fontSizeMain,
+    color:'#fff',
+  },
+  input: {
+    backgroundColor:'#fff',
+    width:'100%',
+    borderRadius:4,
+    paddingHorizontal: fontSizeMain,
+    paddingVertical:0.7*fontSizeMain,
+    fontSize: 0.875 * fontSizeMain,
+    borderColor:colors.lightPink,
+    borderWidth:2,
+    marginBottom:2*fontSizeMain,
+  },
+  avaImg:{
+    borderRadius:50,
+  },
+  /********** PADDING / MARGIN ************/
+  p_fsm:{ padding:fontSizeMain },
+  /***************** FLEX ***************/
+  flex:{ flex: 1},
+  jc_c:{ justifyContent:'center'},
+  jc_sb:{ justifyContent:'space-between'},
+  fd_r:{ flexDirection:'row'},
+  ai_c:{ alignItems:'center'},
+  /******************STYLE TEXT***************/
   p: {
     marginBottom: fontSizeMain,
     lineHeight: fontSizeMain * 1.4,
@@ -68,35 +100,6 @@ export const styles = StyleSheet.create({
     fontSize: fontSizeMain,
     fontFamily:'Montserrat-400'
   },
-  button: {
-    paddingVertical: fontSizeMain*0.6 ,
-    paddingHorizontal:fontSizeMain*1.5,
-    minWidth:100,
-    borderRadius: 10,
-    fontSize:0.875 * fontSizeMain,
-    alignItems:'center',
-    color:'#fff',
-  },
-  input: {
-    backgroundColor:'#fff',
-    width:'100%',
-    borderRadius:4,
-    padding: fontSizeMain,
-    fontSize: 0.875 * fontSizeMain,
-    borderColor:colors.lightPink,
-    borderWidth:2,
-    marginBottom:2*fontSizeMain,
-  },
-  avaImg:{
-    borderRadius:50,
-  },
-  flexRow:{
-    width:fontSizeMain*12,
-    justifyContent:'space-between',
-    alignItems:'center',
-    flexDirection:'row'
-  },
-  /******************STYLE TEXT***************/
   h3: {
     marginBottom: fontSizeMain,
     fontSize:1.15 *fontSizeMain,
@@ -119,16 +122,18 @@ export const styles = StyleSheet.create({
   greyColor:{
     opacity:.6
   },
+  darkPinkColor:{
+    color:colors.darkPink,
+    fontFamily:"Montserrat-500"
+  },
+  greenColor:{
+    color:colors.lightGreen
+  },
   /******************DRAWER*******************/
 drawer:{
-    flex:1,
     backgroundColor:colors.beige,
-    paddingHorizontal:fontSizeMain,
-    paddingVertical:fontSizeMain,
   },
 drawerInfo:{
-    display:'flex',
-    flexDirection:'row',
     marginBottom:fontSizeMain*1.5,
   },
 drawerInfo_Ava:{
@@ -154,21 +159,11 @@ drawerOrdersItem:{
 },
   /******************HEADER******************/
   header: {
-    flex:1,
     width:SCREEN_WIDTH-32,
-    flexDirection:'row',
-    alignItems:'center',
-    justifyContent:'space-between',
     backgroundColor:colors.darkPink
 },
   headerText:{
     letterSpacing:1,
-},
-  header_avatarDiv:{
-    display:'flex',
-    flexDirection:'row',
-    alignItems:'center',
-    justifyContent:'space-between',
 },
   headerAvaImg:{
     width:30,
@@ -181,21 +176,11 @@ profileWrapper:{
 },
 profileBlock:{
   backgroundColor:colors.beige,
-  paddingHorizontal:fontSizeMain,
-  paddingVertical:fontSizeMain,
   marginBottom:fontSizeMain*0.7,
   width:'100%',
 },
 profileInfoAbout:{
-  display:'flex',
-  flexDirection:'row',
   marginBottom:fontSizeMain,
-},
-profileInfoTextView:{
-  paddingVertical:fontSizeMain,
-  paddingHorizontal:fontSizeMain,
-  display:'flex',
-  justifyContent:'center',
 },
 profileInfoTextName:{
   fontFamily:'Montserrat-500',
@@ -213,15 +198,11 @@ slideInnerContainer: {
     paddingBottom: 18 // needed for shadow
 },
 sliderImageContainer: {
-    flex: 1,
     marginBottom: IS_IOS ? 0 : -1, // Prevent a random Android rendering issue
     backgroundColor: 'white',
 },
 sliderImage: {
     height:'100%'
-},
-scrollview: {
-    flex: 1
 },
 slider: {
     marginTop: 15,
@@ -246,13 +227,10 @@ labelEdit:{
   paddingBottom:fontSizeMain*0.4
 },
 editNameOrSurnameOrImgWrapper:{
-  display:'flex',
-  flexDirection:'row',
   alignItems:'flex-start',
   marginBottom:1.5*fontSizeMain,
 },
 editNameOrSurnameWrapper:{
-  flex:1,
   marginLeft:fontSizeMain,
   height:100,
 },
@@ -279,8 +257,6 @@ editImageWrapperAdd:{
   right:0,
   width:100,
   height:100,
-  justifyContent:'center',
-  alignItems:'center'
 },
 incorrectValue:{
   fontSize:0.8*fontSizeMain,
@@ -312,28 +288,24 @@ oldImageItem:{
   height:400,
 },
 /**************ORDERS***********/
-ordersBlock:{
-  padding:fontSizeMain
-},
 notOrder:{
-  flex:1,
-  justifyContent:'center',
-  alignItems:'center',
   paddingTop:(SCREEN_HEIGHT-100)/2,
 },
 orderDescript:{
   paddingBottom:fontSizeMain*0.6,
 },
 orderRow:{
-    flexDirection: 'row',
-    justifyContent:'space-between',
-    padding:fontSizeMain,
-    alignItems:'center',
-    backgroundColor: colors.darkPink,
-    borderRadius:10,
+  backgroundColor:colors.darkPink,
+  borderRadius:10,
+  marginBottom:2
+},
+orderRowSee:{
+  backgroundColor:"#fff",
+  borderWidth:2,
+  borderColor:colors.darkPink
 },
 orderParentHr:{
-    height:1,
+    height:2,
     color: '#fff',
     width:'100%'
 },
@@ -345,6 +317,29 @@ orderChild:{
 },
 orderDescriptGroup:{
   paddingBottom:fontSizeMain
+},
+orderColorsModeratorWrapper:{
+  borderRadius:10,
+  display:'flex',
+  width:'100%',
+  backgroundColor:colors.darkPink,
+  marginBottom:fontSizeMain
+},
+orderColorModerator:{
+  width:2*fontSizeMain,
+  height:fontSizeMain,
+  borderRadius:50,
+  backgroundColor:colors.beige,
+  marginBottom:0.5*fontSizeMain
+},
+orderColorMore2Hour:{
+  backgroundColor:colors.lightPink
+},
+orderColorMore15Minute:{
+  backgroundColor:'#D98989'
+},
+orderColorMin5Minute:{
+  backgroundColor:'#944444'
 },
 /************СЛАЙДЕР ДО/ПОСЛЕ**************/
 sliderBAContainer:{
@@ -358,8 +353,6 @@ sliderBAPhoto:{
 sliderBAArrow:{
   width:2.3*fontSizeMain,
   height:2.3*fontSizeMain,
-  justifyContent:'center',
-  alignItems:'center',
   position:'absolute',
   borderRadius:50,
   zIndex:1
@@ -370,55 +363,84 @@ sliderBAStage:{
   position:'absolute',
   zIndex:1,
   width:8*fontSizeMain,
-  justifyContent:'center',
-  alignItems:'center',
 },
 orderTitleAfter:{
   right:0
+},
+/************** СЛАЙДЕР ДО/ПОСЛЕ С ПОЛЗУНКОМ***********/
+photoBA:{
+  position: 'absolute',
+  top: 0,
+},
+containerPhotoA:{
+  position: 'absolute',
+  top: 0,
+  right: 0,
+  bottom: 0,
+  zIndex: 9,
+  overflow: 'hidden'
+},
+draggerContainer:{
+  position:'relative',
+  width: fontSizeMain*2.6,
+  position: 'absolute',
+  top: 0,
+  zIndex: 11,
+  marginLeft: -fontSizeMain*1.3,
+},
+dragger:{
+  width: fontSizeMain*2.6,
+  height: fontSizeMain*2.6,
+  overflow: 'hidden',
+  borderColor:"#fff",
+  borderWidth:2,
+  borderRadius: 50,
+},
+sliderStage:{
+  position:'absolute',
+  zIndex:10
+},
+stickDragger:{
+  position:'absolute',
+  width:2,
+  left:fontSizeMain*1.3-1,
+  backgroundColor:'#fff'
 },
 /**************СПРАВКА****************/
 referenceItem:{
   justifyContent:'flex-start'
 },
 referenceItemIcon:{
+  width:fontSizeMain,
+  height:fontSizeMain,
   marginRight:fontSizeMain
 },
 /*************REGISTRATE/LOGIN****************/
 regWrapper: {
   paddingHorizontal: 2*fontSizeMain,
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  flex:1,
   backgroundColor: '#F0E9E9',
-},
-regLink:{
-  flexDirection:'row'
 },
 regPage:{
   marginTop:1.5*fontSizeMain,
   width:'100%',
-  justifyContent:'center',
-  alignItems:'center'
+},
+inputGroup:{
+  width:sliderBAWidth,
+  flexDirection: SCREEN_WIDTH > 600 ? 'row' : 'column',
+  justifyContent: SCREEN_WIDTH > 600 ? 'space-between' : 'flex-start',
 },
 regInput:{
-  marginBottom:fontSizeMain*2,
-  width:sliderBAWidth
+  width:SCREEN_WIDTH > 600 ? (sliderBAWidth-2*fontSizeMain)/2 : sliderBAWidth,
 },
+
 checksWrap:{
   width:sliderBAWidth,
-  justifyContent:'space-between',
-  flexDirection:'row',
   marginBottom:fontSizeMain*2
 },
 checkText:{
   marginLeft:fontSizeMain*0.4,
   color:colors.darkPink,
   fontFamily:'Montserrat-500'
-},
-checkWrap:{
-  flexDirection:'row',
-  alignItems:'center',
 },
 /************ NEW ORDER ***********/
 newOrderPhoto:{
@@ -429,24 +451,16 @@ newOrderPicker:{
   width:widthWihtout2Font,
   backgroundColor:colors.lightGrey,
   height:200,
-  justifyContent:'center',
-  alignItems:'center'
 },
 bodyOrFaceWrap:{
   width:'100%',
-  flexDirection:'row',
   justifyContent:'flex-start',
   marginBottom:fontSizeMain*1.5,
-  alignItems:'center'
 },
 bodyOrFaceButton:{
   width:'50%',
-  padding:fontSizeMain,
-  flexDirection:'row',
-  justifyContent:'center',
 },
 bodyOrFaceWindow:{
-  padding:fontSizeMain,
   width:'100%',
   backgroundColor:colors.darkBeige,
 },
@@ -454,17 +468,30 @@ bodyOrFaceParam:{
   marginBottom:fontSizeMain
 },
 paramMinus:{
-  width:1.5*fontSizeMain,
-  height:2,
+  width:5,
+  height:1,
   backgroundColor:colors.red
+},
+paramMinusWrap:{
+  marginLeft:fontSizeMain,
+  width:1.7*fontSizeMain,
+  height:1.7*fontSizeMain,
+  borderRadius:50,
+  backgroundColor:colors.lightPink
+},
+paramPlusWrap:{
+  marginHorizontal:SCREEN_WIDTH < 600 ? 'auto' : fontSizeMain,
+  marginVertical:SCREEN_WIDTH < 600 ? 0.6*fontSizeMain : 0,
+  width:3*fontSizeMain,
+  height:1.7*fontSizeMain,
+  borderRadius:10,
+  backgroundColor:colors.lightPink
 },
 alertNewOrderWrapper:{
   width:'100%',
   flex:1,
   height:SCREEN_HEIGHT-80,
   backgroundColor:colors.darkBeige,
-  justifyContent:'center',
-  alignItems:'center'
 },
 alertNewOrder:{
   width:widthWihtout2Font,
@@ -472,16 +499,74 @@ alertNewOrder:{
   paddingHorizontal:fontSizeMain,
   paddingVertical:2*fontSizeMain,
   borderRadius:10,
-  justifyContent:'center',
-  alignItems:'center'
 },
 statusRatingBlock:{
   width:'100%',
-  padding:fontSizeMain,
   backgroundColor:colors.red,
   opacity:0.7,
   borderRadius:10,
-  flexDirection:'row',
-  alignItems:'center'
 },
+starsRow:{
+  width:fontSizeMain*12,
+},
+infoPopup:{
+  position:'absolute',
+  top:fontSizeMain,
+  left:fontSizeMain,
+  width:SCREEN_WIDTH-2*fontSizeMain,
+  padding:fontSizeMain,
+  backgroundColor:colors.darkBeige,
+  zIndex:100,
+  shadowOffset:{  width: 0,  height: 0,  },
+  shadowColor: 'black',
+  shadowOpacity: .1,
+  shadowRadius: 2*fontSizeMain,
+  borderRadius:10
+},
+/********* ALL DESIGNER ************/
+/********* GALLERY ***************/
+gallery_wrap:{
+  width:SCREEN_WIDTH,
+  flexDirection:'row',
+  flexWrap:'wrap',
+  padding:2,
+},
+gallery_img:{
+  width:SCREEN_WIDTH > 600 ? SCREEN_WIDTH/4-6 : SCREEN_WIDTH/3-6,
+  height:SCREEN_WIDTH > 600 ? SCREEN_WIDTH/4-4 : SCREEN_WIDTH/3-4,
+  margin:2
+},
+galleryHome_img:{
+  width:SCREEN_WIDTH > 600 ? (SCREEN_WIDTH-2*fontSizeMain)/4-4 : (SCREEN_WIDTH-2*fontSizeMain)/3-4,
+  height:SCREEN_WIDTH > 600 ? (SCREEN_WIDTH-2*fontSizeMain)/4-4 : (SCREEN_WIDTH-2*fontSizeMain)/3-4,
+  margin:2,
+  borderRadius:7
+},
+gallery_img__check:{
+  position:'absolute',
+  bottom:0.3*fontSizeMain,
+  right:0.3*fontSizeMain,
+  zIndex:100
+},
+photoActionsWrap:{
+  backgroundColor:colors.beige,
+  marginBottom:fontSizeMain*0.5,
+  justifyContent:'space-around'
+},
+photoActionsText:{
+  fontSize:fontSizeMain*0.9,
+  marginTop:0.2*fontSizeMain
+},
+/**************** REFERENCE ******************/
+logoOfBanks:{
+  width:(SCREEN_WIDTH-2*fontSizeMain)/3-fontSizeMain,
+  paddingHorizontal:0.5*fontSizeMain,
+  height:2*fontSizeMain,
+  resizeMode:'contain'
+},
+sizeVideoYouTube:{
+  height:widthWihtout2Font*0.6,
+  width:widthWihtout2Font,
+  marginBottom:fontSizeMain
+}
 });

@@ -4,7 +4,7 @@ import {styles,colors, fontSizeMain} from './Style'
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 
-export const ChoosePhotoBlock = ({handler,style,status}) => {
+export const ChoosePhotoBlock = ({moderator,handler,style,status}) => {
 
   useEffect(() => {
     (async () => {
@@ -27,15 +27,15 @@ export const ChoosePhotoBlock = ({handler,style,status}) => {
   return(
     <Pressable
         onPress={()=>{
-          !status || status=='designer' ? pickImage() : null
+          (!status || status=='designer')&&!moderator ? pickImage() : null
         }}
-        style={[styles.newOrderPicker,...style]}
+        style={[styles.newOrderPicker,styles.jc_c,styles.ai_c,...style]}
      >
-      <View style={{flexDirection:'row',alignItems:'center'}}>
-        {!status || status == 'designer'
+      <View style={[styles.fd_r,styles.ai_c]}>
+        {(!status || status=='designer')&&!moderator
           ? <Ionicons name="camera-outline" size={30} color={colors.red} style={{marginRight:fontSizeMain*0.6}}/>
           : null}
-        <Text style={[styles.all, styles.redColor,styles.bold]}>{!status || status == 'designer' ? 'Выберете фото' : 'Обрабатывается'}</Text>
+        <Text style={[styles.all, styles.redColor,styles.bold]}>{(!status || status=='designer')&&!moderator ? 'Выберите фото' : 'Обрабатывается'}</Text>
       </View>
     </Pressable>
   )

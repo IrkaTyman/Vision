@@ -2,7 +2,7 @@ import React,{useState,useEffect} from 'react';
 import {Image, Text, View, ScrollView, Pressable,Platform} from 'react-native';
 import {Button} from '../components/Button'
 import * as ImagePicker from 'expo-image-picker';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, AntDesign } from '@expo/vector-icons';
 import {Parameters} from '../components/Parameters'
 import { useForm, Controller } from "react-hook-form";
 import {FormInput} from '../components/FormInput'
@@ -19,7 +19,7 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
    const [height,setHeight] = useState(0)
    const [bodyOrFace,setBodyOrFace] = useState(0)
    const [openWindow, setOpenWindow] = useState(false)
-   let [parameters,setParameters] = useState({})
+   const [parameters,setParameters] = useState({})
    const [amountUniParam, setAmountUniParam] = useState(0)
    const { control, handleSubmit, formState: { errors } } = useForm();
    const [allAmount, setAllAmount] = useState(0)
@@ -28,12 +28,20 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
    const [haveOrder,setHaveOrder] = useState(false)
    const [havingMoney,setHavingMoney] = useState(true)
    const [input,setInput] = useState({})
-
+   const [seeInfo,setSeeInfo] = useState(false)
 
 
    const _handleChange = (key,text) => {
      setInput({ ...input, [key]: text });
     };
+    const addParam = () => {
+      setAmountUniParam(amountUniParam+1)
+      setNoCompleteOrder(false)
+    }
+    const deleteParam = (i) => {
+      setInput({...input,[`param${i}`]:''})
+      setAmountUniParam(amountUniParam-1)
+    }
 
    const dispatch = useDispatch()
    const databaseOrders = firebase.database().ref('orders')
@@ -70,7 +78,7 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
     return amount
   }
   const completeOrders = async () => {
-    if(!props.nowOrder.client && props.user.balance > allAmount-1){
+    if(props.user.balance > allAmount-1){
       let param = []
       let id
       Object.keys(input).map((item) => {
@@ -85,28 +93,33 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
         setNoCompleteOrder(false)
         let order = {
           param,
+          designerUID:'',
+          seeThisOrder:false,
           dateCreate:dateCreate,
           amount:allAmount,
-          client: props.user.email,
+          clientName: `${props.user.username} ${props.user.surname}`,
+          clientUID:props.user.uid,
           status:'inWork',
           dateComplete:dateComplete,
           amountDesigner:0,
-          designer:'',
-          height:height*sliderBAWidth,
+          height:height,
           quickly:timeOrder == 0 ? 15 : 0
         }
+
         let user = props.user
         user.balance -= allAmount
         dispatch(addPerson(user))
-        firebase.database().ref('users/' + user.email.replace('.','')).set(user);
-        databaseOrders.limitToLast(1).get().then(async (snapshot) => {
+        console.log(user)
+        firebase.database().ref('users/' + user.uid).set(user);
+        firebase.database().ref('orders/').limitToLast(1).get().then(async (snapshot) => {
           if(snapshot.exists()){
             id = +Object.keys(snapshot.val())[0]+1
           } else id = 0
           let uploadImg = await uploadImageAsync(image,id)
           order.id = id+1
+          order.visiblePhoto=true
           order.beforeImg = uploadImg
-          databaseOrders.child(id).set(order)
+          firebase.database().ref('orders/').child(id).set(order)
           addOrdersIdToUser(props.user, dispatch, order.id-1)
           dispatch(addNowOrder(order))
         }).catch((err) => console.log(err))
@@ -145,7 +158,7 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
     const snapshot = await ref.put(blob,{contentType:'image/jpeg'});
     return await snapshot.ref.getDownloadURL();
   }
-   const setImageHandler = (result) => {
+  const setImageHandler = (result) => {
      if (!result.cancelled) {
       setHeight(result.height/result.width)
       setImage(result.uri);
@@ -154,8 +167,8 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
    };
     return (
       haveOrder || !havingMoney
-        ? <View style={[styles.alertNewOrderWrapper]}>
-            <View style={styles.alertNewOrder}>
+        ? <View style={[styles.alertNewOrderWrapper,styles.ai_c,styles.jc_c]}>
+            <View style={[styles.alertNewOrder,styles.ai_c,styles.jc_c]}>
               <Text style={[styles.all,styles.whiteColor,]}>У вас {haveOrder ? 'уже есть текущий заказ' : 'недостаточно средств'}</Text>
             </View>
           </View>
@@ -165,7 +178,7 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
             <Parameters sendParam={paramSend} countAllAmount={countAllAmount} parameters={bodyOrFace == 0 ? props.faceParameters : props.bodyParameters}/>
           :
         <View>
-          <View style={[styles.profileBlock,{position:'relative'}]}>
+          <View style={[styles.profileBlock,styles.p_fsm,{position:'relative'}]}>
           {noCompleteOrder
             ? <Text style={[styles.all,styles.boldest,styles.redColor,{fontSize:fontSizeMain*0.8,marginBottom:fontSizeMain}]}>
                 Для совершения заказа необходимо указать фото и параметры для обработки
@@ -190,17 +203,27 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
                       : '#D07070',
                     left:fontSizeMain,
                     bottom:fontSizeMain,
-                    width:'40%'
-                  }]}
+                    width:'40%',
+                  },styles.ai_c,styles.jc_c]}
             >
             <Text style={[styles.whiteColor,styles.all]}>Удалить</Text>
             </Pressable>
           : null
         }
         </View>
-        <View style={[styles.profileBlock,{position:'relative'}]}>
-          <Text style={[styles.all,styles.h3,styles.redColor,styles.bold]}>2. Выберете параметры</Text>
-          <View style={[styles.bodyOrFaceWrap]}>
+        <View style={[styles.profileBlock,styles.p_fsm,{position:'relative'}]}>
+          {seeInfo ?
+            <View style={[styles.infoPopup,styles.ai_c,styles.jc_c]}>
+              <Pressable style={{marginLeft:'auto'}} onPress={()=>setSeeInfo(false)}>
+                <AntDesign  name="close" size={fontSizeMain*1.2} color={colors.red} />
+              </Pressable>
+              <Text style={[styles.all,styles.p]}>
+                Если Вы не нашли подходящий параметр, Вы можете задать свой собственный, но описывающий только 1 область обработки (не более 30 символов). Например: “Выровнять нос по центру”; “Сделать симметрично брови”; “Убрать логотип” и т.п. Если их несколько, просто создайте еще один, при помощи знака “+”.
+              </Text>
+            </View>
+            : null}
+          <Text style={[styles.all,styles.h3,styles.redColor,styles.bold]}>2. Выберите параметры</Text>
+          <View style={[styles.bodyOrFaceWrap,styles.ai_c,styles.fd_r]}>
             <Pressable
                 onPress={() => setBodyOrFace(0)}
                 style={({ pressed }) => [
@@ -208,7 +231,7 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
                       backgroundColor: bodyOrFace == 0 || pressed
                         ? colors.red
                         : colors.lightPink
-                    },styles.bodyOrFaceButton]}
+                    },styles.bodyOrFaceButton,styles.p_fsm,styles.jc_c,styles.fd_r]}
              >
               <Text style={[styles.all, styles.whiteColor,styles.bold]}>Лицо</Text>
             </Pressable>
@@ -219,7 +242,7 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
                       backgroundColor: bodyOrFace == 1 || pressed
                         ? colors.red
                         : colors.lightPink
-                    },styles.bodyOrFaceButton]}
+                    },styles.bodyOrFaceButton,styles.p_fsm,styles.jc_c,styles.fd_r]}
              >
               <Text style={[styles.all, styles.whiteColor,styles.bold]}>Тело</Text>
             </Pressable>
@@ -228,12 +251,21 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
           {Object.keys(parameters).map((item,i) => {
             return <Text key = {i} style={[styles.all,styles.bold,styles.greyColor,styles.bodyOrFaceParam]}>{item}</Text>
           })}
-          <Pressable onPress={() => {setAmountUniParam(amountUniParam+1);setNoCompleteOrder(false)}}>
-            <Text style={[styles.all,styles.p,styles.redColor,styles.bold]}>Добавь свой параметр + (40 виженов)</Text>
+          <Pressable onPress={addParam} style={[styles.fd_r,styles.ai_c,{flexWrap:'wrap',marginBottom:amountUniParam > 0 ? fontSizeMain:null}]}>
+            <Text style={[styles.all,styles.redColor,styles.bold]}>Добавь свой параметр (40 виженов)</Text>
+            <Pressable onPress = {()=>{setSeeInfo(true)}} style={{marginHorizontal:0.2*fontSizeMain}}>
+              <AntDesign name="infocirlce" size={fontSizeMain*1.1} color={colors.red} />
+            </Pressable>
+            {(amountUniParam == 0 && SCREEN_WIDTH < 600) || SCREEN_WIDTH > 600
+              ? <View style={[styles.paramPlusWrap,styles.jc_c,styles.ai_c]}>
+                  <Text style={[styles.all,styles.redColor]}>+</Text>
+                </View>
+              : null}
+
           </Pressable>
           {[...Array(amountUniParam)].map((item,i) => {
             return(
-              <View key = {i} style={[styles.bodyOrFaceWrap]}>
+              <View key = {i} style={[styles.bodyOrFaceWrap,styles.ai_c,styles.fd_r,styles.jc_c]}>
                   <FormInput
                       options={{
                          placeholder:'Ваш параметр',
@@ -242,17 +274,24 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
                       }}
                      styleInput = {[styles.all,styles.input,{marginBottom:0,width:SCREEN_WIDTH-4.5*fontSizeMain}]}
                    />
-                  <Pressable onPress={() => setAmountUniParam(amountUniParam-1)}>
-                    <View style={[styles.paramMinus,{marginLeft:fontSizeMain}]}></View>
+                  <Pressable style={[styles.paramMinusWrap,styles.jc_c,styles.ai_c]} onPress={() => deleteParam(amountUniParam-1)}>
+                    <View style={styles.paramMinus}></View>
                   </Pressable>
                 </View>
             )
           })}
-          <Text style={[styles.all,styles.h3,styles.redColor,styles.bold,{marginTop:fontSizeMain}]}>3. Выберете время</Text>
+          {amountUniParam > 0
+            ? <View style={[styles.ai_c,styles.jc_c,{width:'100%'}]}>
+                <Pressable style={[styles.paramPlusWrap,styles.jc_c,styles.ai_c,{marginVertical:0}]} onPress={addParam}>
+                  <Text style={[styles.all,styles.redColor]}>+</Text>
+                </Pressable>
+              </View>
+            : null}
+          <Text style={[styles.all,styles.h3,styles.redColor,styles.bold,{marginTop:fontSizeMain}]}>3. Выберите время</Text>
           <RadioForm
             formHorizontal={true}
             animation={true}
-            style={[styles.checksWrap,{width:SCREEN_WIDTH-2*fontSizeMain}]}
+            style={[styles.checksWrap,{width:SCREEN_WIDTH-2*fontSizeMain},styles.fd_r,styles.jc_sb]}
             >
               {radio_props.map((obj, i) => (
                 <RadioButton labelHorizontal={true} key={i} style={styles.checkWrap}>

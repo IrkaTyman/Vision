@@ -20,26 +20,30 @@ class RegistrationWrapper extends React.Component {
     this.logIn = this.logIn.bind(this)
   }
     logUp(data,designer){
-      this.props.logup(data,designer)
+      this.props.extraData.logup(data,designer)
       this.setState()
     }
     logIn(data){
-      this.props.login(data)
+      this.props.extraData.login(data)
       this.setState()
     }
     setDesigner(bool){
       this.setState({designer:bool})
     }
+
     render(){
+      console.log(this.props)
       return (
-        <View style={[styles.regWrapper]}>
-          <View style={styles.regLink}>
+        <View style={[styles.regWrapper,styles.ai_c,styles.jc_c,styles.flex]}>
+          <View style={[styles.regLink,styles.fd_r]}>
             <Pressable onPress={() => this.setState({signIn:true})}>
               <Text style={[this.state.signIn ? styles.boldest : styles.bold, styles.redColor]}>Вход</Text>
             </Pressable>
             <Text style={[{marginHorizontal:fontSizeMain}, styles.bold, styles.redColor]}>|</Text>
             <Pressable onPress={() => this.setState({signIn:false})}>
               <Text style={[!this.state.signIn ? styles.boldest : styles.bold, styles.redColor]}>Регистрация</Text>
+            </Pressable>
+            <Pressable onPress={this.props.google}>
             </Pressable>
           </View>
             {this.state.signIn ?
@@ -48,6 +52,7 @@ class RegistrationWrapper extends React.Component {
                     emailReg={EMAIL_REGEX}
                     telReg={TEL_REGEX}/> :
                 <LogUp
+                    navigation={this.props.navigation}
                     designer={this.state.designer}
                     setDesigner={this.setDesigner}
                     submit={this.logUp}

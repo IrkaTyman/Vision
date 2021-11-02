@@ -9,7 +9,7 @@ const Header = (props) => {
     props.nav.openDrawer();
   }
   return(
-    <View style = {styles.header}>
+    <View style = {[styles.flex,styles.fd_r,styles.ai_c,styles.jc_sb,styles.header]}>
       <Pressable
         onPress={openMenu}
         hitSlop={100}>
@@ -19,7 +19,7 @@ const Header = (props) => {
         <Text style={[styles.all,styles.headerText,styles.whiteColor]}>{props.title}</Text>
       </View>
       <Pressable onPress={() => props.nav.navigate('Edit')}>
-      <View style={styles.header_avatarDiv}>
+      <View style={[styles.fd_r,styles.ai_c,styles.jc_sb]}>
         <Image
           source={{uri:props.user.img}}
           style={[styles.headerAvaImg,styles.avaImg]}/>

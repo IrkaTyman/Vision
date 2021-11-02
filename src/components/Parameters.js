@@ -18,7 +18,7 @@ export const Parameters = (props) => {
       props.sendParam(paramGot)
   }
   return(
-    <View style={styles.bodyOrFaceWindow}>
+    <View style={[styles.bodyOrFaceWindow,styles.p_fsm]}>
       {Object.keys(props.parameters).map((item,id) => {
         return (<BouncyCheckbox
           size={fontSizeMain*1.5}

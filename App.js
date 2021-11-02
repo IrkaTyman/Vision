@@ -83,7 +83,7 @@ export default class App extends React.Component {
       return (
         <NavigationContainer>
           <Provider store = {store}>
-            <Application/>
+              <Application/>
           </Provider>
         </NavigationContainer>
       );

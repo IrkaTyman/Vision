@@ -48,22 +48,25 @@ const Edit = (props) => {
        }
      }
      dataUser.img = imgSrc
-     let emailStr = dataUser.email.replace('.','')
      dispatch(addPerson(dataUser))
      setImage('')
      state == 0 ? setState(1) : setState(0)
-     firebase.database().ref('users/' + emailStr).set(dataUser);
+     firebase.database().ref('users/' + dataUser.uid).set(dataUser);
+     props.navigation.goBack()
    }
 
   const pickImage = async () => {
+    console.log(1)
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
+    console.log(2)
     if (!result.cancelled) {
       setImage(result.uri);
+      console.log(result.uri)
     }
   };
   async function uploadImageAvatarAsync(image) {
@@ -85,8 +88,9 @@ const Edit = (props) => {
     return await snapshot.ref.getDownloadURL();
   }
  return (
+
      <View style={[styles.container,styles.containerWithoutBlock,]}>
-       <View style={styles.editNameOrSurnameOrImgWrapper}>
+       <View style={[styles.editNameOrSurnameOrImgWrapper,styles.fd_r]}>
          <View style={{position:'relative'}}>
            <Image source = {{uri:image || props.user.img}} style={[styles.avaImg,{width:100,height:100}]}/>
            <Pressable
@@ -96,12 +100,12 @@ const Edit = (props) => {
                    backgroundColor: pressed
                      ? 'rgba(0,0,0,0.6)'
                      : 'rgba(0,0,0,0.3)'
-                 },styles.editImageWrapperAdd,styles.avaImg]}
+                 },styles.editImageWrapperAdd,styles.avaImg,styles.ai_c,styles.jc_c]}
             >
              <Ionicons name="camera-outline" size={30} color="white" />
            </Pressable>
          </View>
-         <View style={styles.editNameOrSurnameWrapper}>
+         <View style={[styles.editNameOrSurnameWrapper,styles.flex]}>
            <Controller
              name="username"
              defaultValue=''
@@ -110,6 +114,7 @@ const Edit = (props) => {
                <FormInput
                   options={{
                     maxLength:15,
+                    autoComplete:'name',
                     placeholder:props.user.username,
                     onChangeText:(text) => onChange(text),
                     value:value
@@ -117,8 +122,6 @@ const Edit = (props) => {
                   label=""
                   styleLabel = {[styles.all,styles.labelEdit]}
                   styleInput = {[styles.all,styles.input,styles.editNameInput,styles.editNameOrSurnameInput]}
-
-
                 />
              )}
            />
@@ -129,6 +132,7 @@ const Edit = (props) => {
              render={({ field: { onChange, value } }) => (
                <FormInput
                   options={{
+                    autoComplete:'name-family',
                      maxLength:15,
                      placeholder:props.user.surname || 'Фамилия',
                      onChangeText:(text) => onChange(text),
@@ -155,6 +159,7 @@ const Edit = (props) => {
          render={({ field: { onChange, value } }) => (
            <FormInput
                options={{
+                 autoComplete:'email',
                   maxLength:15,
                   placeholder:props.user.email || '',
                   onChangeText:(text) => onChange(text),
@@ -184,6 +189,7 @@ const Edit = (props) => {
          render={({ field: { onChange, value } }) => (
            <FormInput
                options={{
+                  autoComplete:'tel',
                   placeholder:props.user.tel || '',
                   onChangeText:(text) => onChange(text),
                   value:value
@@ -207,6 +213,7 @@ const Edit = (props) => {
          render={({ field: { onChange, value } }) => (
            <FormInput
               options = {{
+                autoComplete:'password',
                 secureTextEntry:true,
                 onChangeText:(text) => onChange(text),
                 value:value

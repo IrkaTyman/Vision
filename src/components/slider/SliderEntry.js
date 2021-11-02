@@ -48,7 +48,7 @@ export default class SliderEntry extends Component {
               style={styles.slideInnerContainer}
               onPress={() => {}}
               >
-                <View style={styles.sliderImageContainer}>
+                <View style={[styles.sliderImageContainer,styles.flex]}>
                     { this.image }
                     <Pressable
                         hitSlop={24}

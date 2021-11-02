@@ -39,7 +39,14 @@
       "measurementId": "G-RLDF2ZNVZ6"
     },
     "plugins":[
-      "@react-native-firebase/app"
-    ]
+      "@react-native-firebase/app",
+      ["expo-image-picker",
+        {"photosPermission": "The app accesses your photos to let you share them with your friends."}
+      ]
+    ],
+    "extra": {
+      "IOS_KEY": "555127756939-6cdseb9cp3pssvo08r5l82bi0ac5g5l6.apps.googleusercontent.com",
+      "ANDROID_KEY": "555127756939-95psug8k4g89hip2geu1i49pm2rk1c86.apps.googleusercontent.com",
+    }
   }
 }

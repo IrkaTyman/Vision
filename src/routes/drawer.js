@@ -5,21 +5,13 @@ import {
   createDrawerNavigator
 } from '@react-navigation/drawer';
 import {createAppContainer} from 'react-navigation';
-import {Text,View,Image} from 'react-native'
+import {Text,View,Image,Pressable} from 'react-native'
 import {FontAwesome} from '@expo/vector-icons'
 import {connect, useDispatch} from 'react-redux'
 import {addPerson,removePerson,addNowOrder,addOldOrders} from '../redux/action'
 import {Svg,Path,Circle} from 'react-native-svg'
 import firebase from 'firebase'
 import {addOrdersIdToUser} from '../function/addOrdersIdToUser'
-
-//Stack
-import HomeStack from './homeStack'
-import NewOrdersStack from './newOrdersStack'
-import NowOrdersStack from './nowOrdersStack'
-import OldOrdersStack from './oldOrdersStack'
-import BalanceStack from './balanceStack'
-import ReferenceStack from './referenceStack'
 
 import {styles,fontSizeMain} from '../components/Style'
 import {Home,Cart,Wallet,Support,Question} from '../components/SVG'
@@ -30,10 +22,9 @@ const DrawerContent = (props) => {
   const dispatch = useDispatch()
   let [state,setState] = useState(0)
   const db= firebase.database().ref('orders')
-
   const takeNewOrder = () => {
-    if(!props.nowOrder.client){
-      db.orderByChild('designer').equalTo('').get().then((snap)=>{
+    if(!props.nowOrder.clientUID){
+      db.orderByChild('designerUID').equalTo('').get().then((snap)=>{
         if(snap.exists()){
           let date = new Date()
           let timeMin = date.getTime()+32400000
@@ -46,7 +37,9 @@ const DrawerContent = (props) => {
               order = snap.val()[item]
             }
           })
-          order.designer = user.email
+          order.designerUID = user.uid
+          order.designerName = `${user.username} ${user.surname}`
+          order.amountDesigner = 20 + order.quickly
           order.dateTake = date.getTime()
           firebase.database().ref('orders/'+id).set(order)
           addOrdersIdToUser(user,dispatch,id)
@@ -63,9 +56,9 @@ const DrawerContent = (props) => {
   }
 
   return(
-    <View style={styles.drawer}>
+    <View style={[styles.flex,styles.drawer,styles.p_fsm]}>
     <DrawerContentScrollView>
-        <View style={styles.drawerInfo}>
+        <Pressable onPress={() => props.navigation.navigate('Home')} style={[styles.drawerInfo,styles.fd_r]}>
         <Image
           source={{uri:user.img}}
           style={[styles.drawerInfo_Ava,styles.avaImg]}/>
@@ -73,7 +66,7 @@ const DrawerContent = (props) => {
             <Text style={[styles.all,styles.profileInfoTextName,styles.profileInfoText,styles.darkPinkColor]}>{user.username}</Text>
             <Text style={[styles.all,styles.profileInfoText,styles.darkPinkColor]}>{user.status}</Text>
           </View>
-        </View>
+        </Pressable>
       <View>
         <DrawerItem
           label='Профиль'
@@ -106,7 +99,7 @@ const DrawerContent = (props) => {
         <DrawerItem
           label='Баланс'
           icon = { () => <Wallet width={fontSizeMain} height={fontSizeMain}/>}
-          onPress={() => props.navigation.navigate('BalanceDesigner')}
+          onPress={() => user.status=='designer' ? props.navigation.navigate('BalanceDesigner') : props.navigation.navigate('BalanceClient')}
           labelStyle = {styles.all}
         />
         <DrawerItem
@@ -118,7 +111,7 @@ const DrawerContent = (props) => {
         <DrawerItem
           label='Справка'
           icon = { () => <Question width={fontSizeMain} height={fontSizeMain}/>}
-          onPress={() => props.navigation.navigate('Reference')}
+          onPress={() => props.navigation.reset({index: 0,routes: [{ name: 'Reference' }]})}
           labelStyle = {styles.all}
         />
         <DrawerItem

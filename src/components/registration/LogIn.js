@@ -10,7 +10,7 @@ export const LogIn = (props) => {
   const { control, handleSubmit, formState: { errors } } = useForm();
   const incorEmailOrPass = props.incorEmailOrPass
   return(
-    <View style={styles.regPage}>
+    <View style={[styles.regPage,styles.ai_c,styles.jc_c]}>
       <Controller
         name="email"
         defaultValue=""
@@ -25,6 +25,7 @@ export const LogIn = (props) => {
         render={({ field: { onChange, value } }) => (
           <FormInput
               options={{
+                 autoComplete:'email',
                  placeholder:'Email',
                  onChangeText:(text) => onChange(text),
                  value:value
@@ -53,6 +54,7 @@ export const LogIn = (props) => {
           render={({ field: { onChange, value } }) => (
             <FormInput
                 options={{
+                   autoComplete:'password',
                    placeholder:'Пароль',
                    onChangeText:(text) => onChange(text),
                    value:value,
