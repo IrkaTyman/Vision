@@ -73,10 +73,12 @@ export const styles = StyleSheet.create({
     borderRadius:4,
     paddingHorizontal: fontSizeMain,
     paddingVertical:0.7*fontSizeMain,
+    marginVertical:0,
     fontSize: 0.875 * fontSizeMain,
     borderColor:colors.lightPink,
     borderWidth:2,
     marginBottom:2*fontSizeMain,
+    position:'relative',
   },
   avaImg:{
     borderRadius:50,
@@ -170,6 +172,12 @@ drawerOrdersItem:{
     height:30,
 },
 /*************PROFILE****************/
+editIcon:{
+  position:'absolute',
+  top:fontSizeMain,
+  right:fontSizeMain,
+  zIndex:100
+},
 profileWrapper:{
   width:SCREEN_WIDTH,
   position:'relative'
@@ -392,7 +400,7 @@ dragger:{
   width: fontSizeMain*2.6,
   height: fontSizeMain*2.6,
   overflow: 'hidden',
-  borderColor:"#fff",
+  borderColor:colors.lightGrey,
   borderWidth:2,
   borderRadius: 50,
 },
@@ -404,7 +412,7 @@ stickDragger:{
   position:'absolute',
   width:2,
   left:fontSizeMain*1.3-1,
-  backgroundColor:'#fff'
+  backgroundColor:colors.lightGrey
 },
 /**************СПРАВКА****************/
 referenceItem:{
@@ -416,6 +424,15 @@ referenceItemIcon:{
   marginRight:fontSizeMain
 },
 /*************REGISTRATE/LOGIN****************/
+secureEye:{
+  opacity:0.6,
+},
+secureEyeWrap:{
+  position:'absolute',
+  right:fontSizeMain,
+  top:0.7*fontSizeMain,
+  zIndex:100
+},
 regWrapper: {
   paddingHorizontal: 2*fontSizeMain,
   backgroundColor: '#F0E9E9',
@@ -511,8 +528,7 @@ starsRow:{
 },
 infoPopup:{
   position:'absolute',
-  top:fontSizeMain,
-  left:fontSizeMain,
+  bottom:'100%',
   width:SCREEN_WIDTH-2*fontSizeMain,
   padding:fontSizeMain,
   backgroundColor:colors.darkBeige,
@@ -524,6 +540,19 @@ infoPopup:{
   borderRadius:10
 },
 /********* ALL DESIGNER ************/
+actionWithUserPopupText:{
+  marginBottom:0.6*fontSizeMain
+},
+actionWithUserBtn:{
+  width:1.5*fontSizeMain,
+  height:1.5*fontSizeMain,
+},
+actionWithUserBtnText:{
+  letterSpacing:0.15*fontSizeMain
+},
+actionWithUserAva:{
+  marginRight:0.6*fontSizeMain
+},
 /********* GALLERY ***************/
 gallery_wrap:{
   width:SCREEN_WIDTH,
@@ -548,6 +577,12 @@ gallery_img__check:{
   right:0.3*fontSizeMain,
   zIndex:100
 },
+gallery_icon_panel:{
+  width:2.3*fontSizeMain,
+  height:2.3*fontSizeMain,
+  borderRadius:50,
+  backgroundColor:colors.red,
+},
 photoActionsWrap:{
   backgroundColor:colors.beige,
   marginBottom:fontSizeMain*0.5,
@@ -568,5 +603,98 @@ sizeVideoYouTube:{
   height:widthWihtout2Font*0.6,
   width:widthWihtout2Font,
   marginBottom:fontSizeMain
-}
+},
+/*************** BALANCE *****************/
+uncoverBlockHeader:{
+  marginBottom:2,
+},
+
+/***************** ERROR **************/
+blockImg:{
+  width:5*fontSizeMain,
+  height:5*fontSizeMain
+},
+blockText:{
+  marginBottom:1*fontSizeMain
+},
+/*************** SUPPORT ******************/
+supportMain:{
+  width:'100%',
+  display:'flex',
+  marginBottom:fontSizeMain,
+},
+supportFooter:{
+  backgroundColor:colors.red,
+  width:'100%',
+  paddingRight:2*fontSizeMain,
+  position:'relative',
+  paddingTop:0
+},
+supportIconBtn:{
+  position:'absolute',
+  top:0,
+  right:0,
+},
+supportIcon:{
+  backgroundColor:colors.red,
+  borderRadius:50,
+  padding:1.5*fontSizeMain
+},
+messageName:{
+  marginBottom:0.3*fontSizeMain,
+  fontSize:0.8*fontSizeMain
+},
+messageWrap:{
+  borderRadius:10,
+  paddingHorizontal:fontSizeMain,
+  paddingVertical:0.5*fontSizeMain,
+  marginBottom:0.5*fontSizeMain,
+  maxWidth:widthWihtout2Font-2*fontSizeMain
+},
+lastMessage:{marginBottom:fontSizeMain*1.5},
+leftMessage:{
+  backgroundColor:colors.beige,
+  marginRight:'auto',
+},
+rightMessage:{
+  backgroundColor:colors.red,
+  marginLeft:'auto',
+  alignItems:'flex-end'
+},
+messageData:{
+  fontSize:0.6*fontSizeMain,
+  marginLeft:fontSizeMain
+},
+reloadMessage:{
+  position:'absolute',
+  backgroundColor:colors.darkPink,
+  width:3*fontSizeMain,
+  height:3*fontSizeMain,
+  borderRadius:1.5*fontSizeMain,
+  top:fontSizeMain*0.5,
+  right:fontSizeMain*0.5,
+  zIndex:150
+},
+activeMessageDot:{
+  width:0.5*fontSizeMain,
+  height:0.5*fontSizeMain,
+  backgroundColor:colors.red,
+  borderRadius:3,
+  position:'absolute',
+  top:fontSizeMain,
+  right:fontSizeMain
+},
+messageText:{
+  maxWidth:sliderBAWidth-2*fontSizeMain
+},
+activeMessageDotWithUser:{
+  top:0,
+  right:-fontSizeMain
+},
+resolveIssue:{
+  backgroundColor:'#944444',
+  width:3*fontSizeMain,
+  height:3*fontSizeMain,
+  borderRadius:1.5*fontSizeMain,
+},
 });

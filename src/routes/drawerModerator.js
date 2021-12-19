@@ -5,12 +5,14 @@ import {
   createDrawerNavigator
 } from '@react-navigation/drawer';
 import {createAppContainer} from 'react-navigation';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Text,View,Image} from 'react-native'
 import {FontAwesome} from '@expo/vector-icons'
 import {connect, useDispatch} from 'react-redux'
 import {addPerson,removePerson,addNowOrder,addOldOrders} from '../redux/action'
 import {Svg,Path,Circle} from 'react-native-svg'
-import firebase from 'firebase'
+import firebase from 'firebase/app'
+import 'firebase/database'
 import {addOrdersIdToUser} from '../function/addOrdersIdToUser'
 
 import {styles,fontSizeMain} from '../components/Style'
@@ -23,12 +25,12 @@ const DrawerContentModerator = (props) => {
   let [state,setState] = useState(0)
   const db= firebase.database().ref('orders')
 
-  const signOut = () => {
+  const signOut =  async () => {
     dispatch(addNowOrder({}))
     dispatch(addOldOrders([]))
     dispatch(removePerson('Log out'))
+    await AsyncStorage.removeItem('@storage_user')
   }
-
   return(
     <View style={[styles.flex,styles.drawer,styles.p_fsm]}>
     <DrawerContentScrollView>
@@ -52,19 +54,19 @@ const DrawerContentModerator = (props) => {
         <DrawerItem
           label='Заказчики'
           icon = { () => <Wallet width={fontSizeMain} height={fontSizeMain}/>}
-          onPress={() => props.navigation.navigate('AllClients')}
+          onPress={() => props.navigation.navigate('client')}
           labelStyle = {styles.all}
         />
         <DrawerItem
           label='Исполнители'
           icon = { () => <Support width={fontSizeMain} height={fontSizeMain}/>}
-          onPress={() => props.navigation.navigate('AllDesigners')}
+          onPress={() => props.navigation.navigate('designer')}
           labelStyle = {styles.all}
         />
         <DrawerItem
           label='Пoддержка'
           icon = { () => <Support width={fontSizeMain} height={fontSizeMain}/>}
-          onPress={() => {}}
+          onPress={() => {props.navigation.navigate('SupportModerator')}}
           labelStyle = {styles.all}
         />
         <DrawerItem
@@ -88,6 +90,8 @@ const DrawerContentModerator = (props) => {
 
 let mapStoreToProps = (store) => ({
   user:store.register.user,
+  allClients:store.register.allClients,
+  allDesigners:store.register.allDesigners,
 })
 
 export default connect(mapStoreToProps)(DrawerContentModerator)

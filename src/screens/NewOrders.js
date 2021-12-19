@@ -6,7 +6,9 @@ import { Ionicons, AntDesign } from '@expo/vector-icons';
 import {Parameters} from '../components/Parameters'
 import { useForm, Controller } from "react-hook-form";
 import {FormInput} from '../components/FormInput'
-import firebase from 'firebase'
+import firebase from 'firebase/app'
+import 'firebase/database'
+import 'firebase/storage'
 import {addOrdersIdToUser} from '../function/addOrdersIdToUser'
 import RadioForm, {RadioButton, RadioButtonInput, RadioButtonLabel} from 'react-native-simple-radio-button';
 import {ChoosePhotoBlock} from '../components/ChoosePhotoBlock'
@@ -19,7 +21,7 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
    const [height,setHeight] = useState(0)
    const [bodyOrFace,setBodyOrFace] = useState(0)
    const [openWindow, setOpenWindow] = useState(false)
-   const [parameters,setParameters] = useState({})
+   const [parameters,setParameters] = useState({face:{},body:{}})
    const [amountUniParam, setAmountUniParam] = useState(0)
    const { control, handleSubmit, formState: { errors } } = useForm();
    const [allAmount, setAllAmount] = useState(0)
@@ -30,15 +32,27 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
    const [input,setInput] = useState({})
    const [seeInfo,setSeeInfo] = useState(false)
 
+   function createParametersState(){
+     let state = {face:{},body:{}}
+     Object.keys(props.faceParameters).map((item,i) => {
+       state.face[`${item}`]= {price:props.faceParameters[`${item}`],selected:false}
+     })
+     Object.keys(props.bodyParameters).map((item,i) => {
+       state.body[`${item}`]= {price:props.bodyParameters[`${item}`],selected:false}
+     })
+     return state
+   }
 
    const _handleChange = (key,text) => {
      setInput({ ...input, [key]: text });
     };
+
     const addParam = () => {
       setAmountUniParam(amountUniParam+1)
       setNoCompleteOrder(false)
     }
-    const deleteParam = (i) => {
+
+    const deleteOursParam = (i) => {
       setInput({...input,[`param${i}`]:''})
       setAmountUniParam(amountUniParam-1)
     }
@@ -61,30 +75,53 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
     })()
      countAllAmount()
    })
-   const paramSend = (param) => {
-    setParameters(Object.assign(parameters,param))
-    setOpenWindow(false)
-    setNoCompleteOrder(false)
-  }
+
+const paramSend = (param,type) => {
+  let paramObj = Object.assign({},parameters)
+  paramObj[type] = param
+  setParameters(paramObj)
+  setOpenWindow(false)
+  setNoCompleteOrder(false)
+}
+const deleteParam = (param,type) => {
+  let paramObj = Object.assign({},parameters)
+  delete paramObj[type][param]
+  setParameters(paramObj)
+}
   const countAllAmount = (bool) => {
     let amount = 20
     if(timeOrder == 0) amount = 50
     if(bool) amount += 40
-    Object.keys(parameters).map((item) => {
-      amount+=parameters[item]
+    Object.keys(parameters.face).map((item) => {
+      amount+=parameters.face[item]
+    })
+    Object.keys(parameters.body).map((item) => {
+      amount+=parameters.body[item]
     })
     amount+=amountUniParam*40
     setAllAmount(amount)
     return amount
   }
+  function checkProirityForOrder(time,subscription){
+    if(!time){
+      return 0
+    }
+    if(subscription){
+      if(subscription.name != 'Light Vision') return 2
+    }
+    return 6
+  }
   const completeOrders = async () => {
-    if(props.user.balance > allAmount-1){
+    let date = Date.now()
+    let allAmountDub = allAmount > 499 ? allAmount*0.9 : allAmount
+    props.user.subscription.day > date && props.user.canSubsc == true
+    if(props.user.balance > allAmount-1 || props.user.subscription.day > date && props.user.canSubsc == true){
       let param = []
       let id
       Object.keys(input).map((item) => {
         param.push(input[item])
       })
-      param = param.concat(Object.keys(parameters))
+      param = param.concat(Object.keys(parameters.face),Object.keys(parameters.body))
       if(image != '' && param!=false){
         let dateCreate = Date.now()
         let dateComplete
@@ -93,38 +130,45 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
         setNoCompleteOrder(false)
         let order = {
           param,
+          priority:checkProirityForOrder(timeOrder,props.user.subscription),
           designerUID:'',
-          seeThisOrder:false,
+          seeThisOrderdesigner:false,
+          seeThisOrderclient:false,
           dateCreate:dateCreate,
-          amount:allAmount,
-          clientName: `${props.user.username} ${props.user.surname}`,
+          amount:allAmountDub,
           clientUID:props.user.uid,
           status:'inWork',
           dateComplete:dateComplete,
           amountDesigner:0,
           height:height,
-          quickly:timeOrder == 0 ? 15 : 0
+          visiblePhotodesigner:true,
+          visiblePhotoclient:true,
+          quickly:timeOrder == 0 ? 5 : 0
         }
-
         let user = props.user
-        user.balance -= allAmount
+        user.balance = props.user.subscription.day > date && props.user.canSubsc == true ? user.balance : user.balance - allAmountDub
         dispatch(addPerson(user))
-        console.log(user)
+        if(props.user.subscription.day > date && props.user.canSubsc == true){
+          user.subscription.photo-=1
+        }
         firebase.database().ref('users/' + user.uid).set(user);
         firebase.database().ref('orders/').limitToLast(1).get().then(async (snapshot) => {
           if(snapshot.exists()){
+            console.log(snapshot.val())
             id = +Object.keys(snapshot.val())[0]+1
           } else id = 0
           let uploadImg = await uploadImageAsync(image,id)
-          order.id = id+1
-          order.visiblePhoto=true
+          order.id = id
           order.beforeImg = uploadImg
+          let nowOrder = props.nowOrder
+          nowOrder[id] = order
+          console.log(order)
           firebase.database().ref('orders/').child(id).set(order)
-          addOrdersIdToUser(props.user, dispatch, order.id-1)
-          dispatch(addNowOrder(order))
+          addOrdersIdToUser(props.user, dispatch, order.id)
+          dispatch(addNowOrder(nowOrder))
         }).catch((err) => console.log(err))
         setImage(''),
-        setParameters({})
+        setParameters({face:{},body:{}})
         setAllAmount(0)
         setInput({})
         setAmountUniParam(0)
@@ -166,16 +210,16 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
     setNoCompleteOrder(false)
    };
     return (
-      haveOrder || !havingMoney
+      (haveOrder && props.user.status == 'designer') || !havingMoney
         ? <View style={[styles.alertNewOrderWrapper,styles.ai_c,styles.jc_c]}>
             <View style={[styles.alertNewOrder,styles.ai_c,styles.jc_c]}>
-              <Text style={[styles.all,styles.whiteColor,]}>У вас {haveOrder ? 'уже есть текущий заказ' : 'недостаточно средств'}</Text>
+              <Text style={[styles.all,styles.whiteColor,]}>У вас {!havingMoney ? 'недостаточно средств' : 'уже есть текущий заказ'}</Text>
             </View>
           </View>
         :
       <ScrollView style={[styles.container,styles.profileWrapper,openWindow ? {height:'100%'} : null]}>
         {openWindow ?
-            <Parameters sendParam={paramSend} countAllAmount={countAllAmount} parameters={bodyOrFace == 0 ? props.faceParameters : props.bodyParameters}/>
+            <Parameters sendParam={paramSend} type ={bodyOrFace == 0 ? 'face' : 'body'} countAllAmount={countAllAmount} parameters={bodyOrFace == 0 ? props.faceParameters : props.bodyParameters} state = {bodyOrFace == 0 ? parameters.face : parameters.body}/>
           :
         <View>
           <View style={[styles.profileBlock,styles.p_fsm,{position:'relative'}]}>
@@ -212,16 +256,6 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
         }
         </View>
         <View style={[styles.profileBlock,styles.p_fsm,{position:'relative'}]}>
-          {seeInfo ?
-            <View style={[styles.infoPopup,styles.ai_c,styles.jc_c]}>
-              <Pressable style={{marginLeft:'auto'}} onPress={()=>setSeeInfo(false)}>
-                <AntDesign  name="close" size={fontSizeMain*1.2} color={colors.red} />
-              </Pressable>
-              <Text style={[styles.all,styles.p]}>
-                Если Вы не нашли подходящий параметр, Вы можете задать свой собственный, но описывающий только 1 область обработки (не более 30 символов). Например: “Выровнять нос по центру”; “Сделать симметрично брови”; “Убрать логотип” и т.п. Если их несколько, просто создайте еще один, при помощи знака “+”.
-              </Text>
-            </View>
-            : null}
           <Text style={[styles.all,styles.h3,styles.redColor,styles.bold]}>2. Выберите параметры</Text>
           <View style={[styles.bodyOrFaceWrap,styles.ai_c,styles.fd_r]}>
             <Pressable
@@ -248,21 +282,44 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
             </Pressable>
           </View>
           <Button title='Выбрать параметры' onPress={()=>setOpenWindow(true)} style={styles.p}/>
-          {Object.keys(parameters).map((item,i) => {
-            return <Text key = {i} style={[styles.all,styles.bold,styles.greyColor,styles.bodyOrFaceParam]}>{item}</Text>
+          <Text style={[styles.all,styles.redColor,styles.bold,{marginBottom:fontSizeMain}]}>Обработка лица:</Text>
+          {Object.keys(parameters.face).map((item,i) => {
+            return <View style={[styles.fd_r,styles.jc_sb]} key={i}>
+              <Text key = {i} style={[styles.all,styles.bold,styles.greyColor,styles.bodyOrFaceParam]}>{item}</Text>
+              <Pressable onPress={()=>deleteParam(item,'face')}><AntDesign name="close" size={fontSizeMain*1.1} color={colors.red} /></Pressable>
+            </View>
           })}
-          <Pressable onPress={addParam} style={[styles.fd_r,styles.ai_c,{flexWrap:'wrap',marginBottom:amountUniParam > 0 ? fontSizeMain:null}]}>
-            <Text style={[styles.all,styles.redColor,styles.bold]}>Добавь свой параметр (40 виженов)</Text>
-            <Pressable onPress = {()=>{setSeeInfo(true)}} style={{marginHorizontal:0.2*fontSizeMain}}>
-              <AntDesign name="infocirlce" size={fontSizeMain*1.1} color={colors.red} />
+          <Text style={[styles.all,styles.redColor,styles.bold,{marginBottom:fontSizeMain}]}>Обработка тела:</Text>
+          {Object.keys(parameters.body).map((item,i) => {
+              return <View style={[styles.fd_r,styles.jc_sb]} key={i}>
+                <Text key = {i} style={[styles.all,styles.bold,styles.greyColor,styles.bodyOrFaceParam]}>{item}</Text>
+                <Pressable onPress={()=>deleteParam(item,'body')}><AntDesign name="close" size={fontSizeMain*1.1} color={colors.red} /></Pressable>
+              </View>
+          })}
+          <View style={[styles.fd_r,styles.ai_c,{flexWrap:'wrap',marginBottom:amountUniParam > 0 ? fontSizeMain:null,marginTop:fontSizeMain}]}>
+          {seeInfo ?
+            <View style={[styles.infoPopup,styles.ai_c,styles.jc_c]}>
+              <Pressable style={{marginLeft:'auto'}} onPress={()=>setSeeInfo(false)}>
+                <AntDesign  name="close" size={fontSizeMain*1.2} color={colors.red} />
+              </Pressable>
+              <Text style={[styles.all,styles.p]}>
+                Если Вы не нашли подходящий параметр, Вы можете задать свой собственный, но описывающий только 1 область обработки (не более 30 символов). Например: “Выровнять нос по центру”; “Сделать симметрично брови”; “Убрать логотип” и т.п. Если их несколько, просто создайте еще один, при помощи знака “+”.
+              </Text>
+            </View>
+            : null}
+            <Pressable onPress = {()=>{setSeeInfo(true)}} style={[styles.ai_c,styles.jc_c,styles.fd_r]}>
+              <Text style={[styles.all,styles.redColor,styles.bold]}>Добавь свой параметр (40 виженов)</Text>
+              <AntDesign name="infocirlce" size={fontSizeMain*1.1} color={colors.red} style={{marginHorizontal:0.2*fontSizeMain}}/>
             </Pressable>
             {(amountUniParam == 0 && SCREEN_WIDTH < 600) || SCREEN_WIDTH > 600
-              ? <View style={[styles.paramPlusWrap,styles.jc_c,styles.ai_c]}>
-                  <Text style={[styles.all,styles.redColor]}>+</Text>
-                </View>
+              ? <Pressable onPress={addParam} style={[styles.jc_c,styles.ai_c,SCREEN_WIDTH < 600 ? {width:'100%'} : {marginLeft:fontSizeMain}]}>
+                    <View style={[styles.paramPlusWrap,styles.jc_c,styles.ai_c]}>
+                      <Text style={[styles.all,styles.redColor]}>+</Text>
+                    </View>
+                </Pressable>
               : null}
+          </View>
 
-          </Pressable>
           {[...Array(amountUniParam)].map((item,i) => {
             return(
               <View key = {i} style={[styles.bodyOrFaceWrap,styles.ai_c,styles.fd_r,styles.jc_c]}>
@@ -274,7 +331,7 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
                       }}
                      styleInput = {[styles.all,styles.input,{marginBottom:0,width:SCREEN_WIDTH-4.5*fontSizeMain}]}
                    />
-                  <Pressable style={[styles.paramMinusWrap,styles.jc_c,styles.ai_c]} onPress={() => deleteParam(amountUniParam-1)}>
+                  <Pressable style={[styles.paramMinusWrap,styles.jc_c,styles.ai_c]} onPress={() => deleteOursParam(amountUniParam-1)}>
                     <View style={styles.paramMinus}></View>
                   </Pressable>
                 </View>
@@ -294,7 +351,7 @@ import {styles,colors,fontSizeMain,sliderBAWidth,widthWihtout2Font,SCREEN_WIDTH}
             style={[styles.checksWrap,{width:SCREEN_WIDTH-2*fontSizeMain},styles.fd_r,styles.jc_sb]}
             >
               {radio_props.map((obj, i) => (
-                <RadioButton labelHorizontal={true} key={i} style={styles.checkWrap}>
+                <RadioButton labelHorizontal={true} key={i}>
                   <RadioButtonInput
                     obj={obj}
                     index={i}

@@ -1,29 +1,23 @@
-import React, { Component, useState,useEffect } from "react";
+import React, { Component, useState } from "react";
 import { View,Image,ScrollView, TouchableOpacity, Pressable,Text, StyleSheet, LayoutAnimation, Platform, UIManager } from "react-native";
 import { AntDesign } from '@expo/vector-icons';
 import {styles,fontSizeMain,sliderBAWidth,colors} from '../components/Style';
-import {SliderBA} from '../components/SliderBA'
-import Slider from '../components/slider/Slider'
 import {currencySpelling} from '../function/currencySpelling'
 import {Button} from '../components/Button'
-import firebase from 'firebase'
+import firebase from 'firebase/app'
+import 'firebase/database'
 import store from '../redux/store'
-import {addNowOrder,addOldOrders,withdrawMoney} from '../redux/action'
+import {addNowOrder,addOldOrders,withdrawMoney,changeCountImgInGallery} from '../redux/action'
 import {FormInput} from '../components/FormInput'
 import {localeStatusOrder} from '../function/localeStatusOrder'
 import {getNormalDate} from '../function/getNormalDate'
+import {reloadOrders} from '../function/reloadOrders'
+import OrderInfoNow from '../components/OrderInfoNow'
 //REDUX
 import {connect,useSelector,useDispatch} from 'react-redux'
 
 const NowOrders = (props) => {
-  let [rating,setRating] = useState(0)
-  let [state,setState]=useState(0)
-  let [noCompleteOrder,setNoCompleteOrder] = useState(false)
-  let [noCompulsoryCommets,setNoCompulsoryCommets] = useState(false)
-  let [comment,setComment] = useState('')
-  let [afterImg,setAfterImg] = useState('')
-  let [nowOrderId,setNowOrder] = useState(props.nowOrder.id-1)
-  let [balanceDesigner,setBalanceDesigner] = useState(props.user.balance)
+  let [state,setState]=useState(false)
   let dispatch = useDispatch()
   let statusOrderRef = firebase.database().ref('orders/' + (props.nowOrder.id-1));
 
@@ -45,29 +39,14 @@ const NowOrders = (props) => {
      }
    }*/
 
-  const setImageHandler = async (result) => {
-    if(!result.cancelled) {
-      setAfterImg(result.uri)
-    }
-  }
-  const deleteImageHandler = () => {
-    setAfterImg('')
-  }
-  const completeOrders = async () => {
-    if(afterImg){
-      const databaseOrders = firebase.database().ref('orders')
+  const completeOrders = async (afterImg,id) => {
       let order = props.nowOrder
-      let uploadImg = await uploadImageAsync(afterImg,order.id-1)
-      order.afterImg = uploadImg
-      order.status='inRating'
-      dispatch(addNowOrder(order))
-      databaseOrders.child(order.id-1).set(order)
-      setNoCompleteOrder(false)
-      setAfterImg('')
-    } else setNoCompleteOrder(true)
+      order[id].status='inRating'
+
+      await uploadImageAsync(afterImg,id,order)
   }
 
-  const uploadImageAsync = async (image,id) => {
+  const uploadImageAsync = async (image,id,order) => {
     const blob = await new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.onload = function () {
@@ -83,213 +62,75 @@ const NowOrders = (props) => {
     });
     const ref = firebase.storage().ref(`/orders/${id}/${id}-1.jpg`);
     const snapshot = await ref.put(blob,{contentType:'image/jpeg'});
-    return await snapshot.ref.getDownloadURL();
+    const databaseOrders = firebase.database().ref('orders')
+    order[id].afterImg = await snapshot.ref.getDownloadURL();
+    order[id].dateCompleteDesigner = Date.now()
+    const oldOrders = props.oldOrders || []
+    oldOrders.push(order[id])
+    let allVisibleImg = props.allVisibleImgInGallery
+    allVisibleImg[id] = order[id].afterImg
+    dispatch(addNowOrder({}))
+    dispatch(changeCountImgInGallery(allVisibleImg))
+    dispatch(addOldOrders(oldOrders))
+    databaseOrders.child(id).set(order[id])
   }
-
-  const setRatingBeforeAgree = (stars) => {
-    setRating(stars)
-    setNoCompleteOrder(false)
-    setNoCompulsoryCommets(false)
-  }
-
-  const setRatingAgree = () => {
-    let order = props.nowOrder
-    if(rating){
-      if(rating < 4 && comment != '' || rating > 3){
-        const databaseOrders = firebase.database().ref('orders')
-        const oldOrders = props.oldOrders || []
-        order.rating == 5 ?  order.amountDesigner += 20 : null
-        order.comment = comment
-        order.rating=rating
-        order.status='inComplete'
-        oldOrders.push(order)
-        dispatch(addNowOrder({}))
-        dispatch(addOldOrders(oldOrders))
-        databaseOrders.child(order.id-1).set(order)
-        firebase.database().ref('users/' + order.designerUID).get().then((snap)=>{
-          if(snap.exists()){
-            let balance = snap.val().balance+order.amountDesigner
-            firebase.database().ref('users/' + order.designerUID).update({balance:order.amountDesigner})
-          }
-        })
-        setNoCompulsoryCommets(false)
-        setRating(0)
-      } else setNoCompulsoryCommets(true)
-    } else setNoCompleteOrder(true)
-  }
-  const addListener = (id,ref,type) => {
-    deleteListener(ref)
-    let statusRef = ref
-    if(type == 'order'){
-      statusRef.on('value', (snapshot) => {
-        let data = snapshot.val()
-        if (data){
-          if(data.status != props.nowOrder.status){
-            if(data.status == 'inComplete'){
-              let oldOrders = props.oldOrders
-              let allVisibleImg = props.allVisibleImgInGallery
-              if(oldOrders[oldOrders.length-1].id != data.id){
-                oldOrders.push(data)
-                allVisibleImg[oldOrders.length-1] = data.afterImg
-                dispatch(addOldOrders(oldOrders))
-                dispatch(changeCountImgInGallery(allVisibleImg))
-              }
-              dispatch(addNowOrder({}))
-            } else {
-              dispatch(addNowOrder(data))
-            }}
-        }
-     })}
-    else {
-      statusRef.on('value',(snap) => {
-        let data = snap.val()
-        dispatch(withdrawMoney(data))
-      })
-    }
-  }
-  const deleteListener = (ref) => {
-    let statusRef = ref
-    statusRef.off()
-  }
-  if(nowOrderId != props.nowOrder.id){
-    addListener(props.nowOrder.id-1,firebase.database().ref('orders/' + (props.nowOrder.id-1)),'order')
-    setNowOrder(props.nowOrder.id)
-    state == 0 ? setState(1) : setState(0)
-  }
-  if(props.user.status == 'designer' && balanceDesigner != 1000){
-    setBalanceDesigner(1000)
-    addListener('',firebase.database().ref('users/' + props.user.uid + '/balance'),'user')
-  }
-  return (
-      <ScrollView style={styles.container}>
-      {!props.nowOrder.clientUID ?
-        <View style={[styles.notOrder,styles.flex,styles.ai_c,styles.jc_c]}>
-          <Text style={[styles.all,styles.bold,styles.darkPinkColor]}>
-            Пока здесь ничего нет
-          </Text>
-        </View>
-      :
-      <View style={styles.p_fsm}>
-        <View style={[styles.orderRow,styles.p_fsm,styles.fd_r,
-                      styles.ai_c,styles.jc_c,{borderBottomLeftRadius: 0,borderBottomRightRadius:0}]}>
-          <Text style={[styles.whiteColor, styles.all]}>Заказ №{props.nowOrder.id}</Text>
-        </View>
-        <View style={styles.orderParentHr}/>
-        <View style={styles.orderChild}>
-        {noCompleteOrder && props.user.status == 'designer'
-          ? <Text style={[styles.all,styles.boldest,styles.redColor,{fontSize:fontSizeMain*0.8,marginBottom:fontSizeMain}]}>
-              Для завершения работы нужно приложить готовое фото
-            </Text>
-          : null}
-          <SliderBA
-            handlerDelete={deleteImageHandler}
-            handler={setImageHandler}
-            height={props.nowOrder.height}
-            photo={[props.nowOrder.beforeImg,props.nowOrder.afterImg||afterImg]}
-            userStatus={props.user.status}
-            userId={props.nowOrder.id}
-            orderStatus={props.nowOrder.status}/>
-
-          <View style={styles.orderDescriptGroup}>
-            <Text style={[styles.all,styles.orderDescript,styles.redColor,styles.bold,{fontSize:fontSizeMain*1.2}]}><Text style={{fontSize:fontSizeMain}}>Выполнить до:</Text> {getNormalDate(props.nowOrder.dateComplete)}</Text>
-            <Text style={[styles.all,styles.orderDescript]}><Text style={[styles.all,styles.orderDescript,styles.bold]}>Взят в работу:</Text> {props.nowOrder.dateTake ? getNormalDate(props.nowOrder.dateTake) : '-'}</Text>
-            <Text style={[styles.all,styles.orderDescript,styles.bold]}>
-              Статус:
-              <Text style={{color:'green'}}>
-                {localeStatusOrder(props.nowOrder.status)}
-              </Text>
+  const setRatingAgree = (rating,comment,id) => {
+    if (props.nowOrder[id]){
+      let order = props.nowOrder[id]
+      if(rating){
+          const databaseOrders = firebase.database().ref('orders')
+          const oldOrders = props.oldOrders || []
+          rating == 5 ?  order.amountDesigner += 10 : null
+          order.comment = comment
+          order.rating=rating
+          order.status='inComplete'
+          oldOrders.push(order)
+          let nowOrder = props.nowOrder
+          delete nowOrder[id]
+          let allVisibleImg = props.allVisibleImgInGallery
+          allVisibleImg[order.id] = order.afterImg
+          dispatch(addNowOrder(nowOrder))
+          dispatch(changeCountImgInGallery(allVisibleImg))
+          dispatch(addOldOrders(oldOrders))
+          databaseOrders.child(id).set(order)
+          firebase.database().ref('users/' + order.designerUID).get().then((snap)=>{
+            if(snap.exists()){
+              let balance = snap.val().balance+order.amountDesigner
+              firebase.database().ref('users/' + order.designerUID).update({balance:balance})
+            }
+          })
+    }} else reloadOrders(props.user.orders,dispatch,props.user)}
+    return (
+        <ScrollView style={styles.container}>
+        {!props.nowOrder[Object.keys(props.nowOrder)[0]] ?
+          <View style={[styles.notOrder,styles.flex,styles.ai_c,styles.jc_c]}>
+            <Text style={[styles.all,styles.bold,styles.darkPinkColor]}>
+              Пока здесь ничего нет
             </Text>
           </View>
-          <View style={styles.orderDescriptGroup}>
-            <Text style={[styles.all,styles.orderDescript,styles.bold]}>Задание:</Text>
-            {props.nowOrder.param ?
-              props.nowOrder.param.map((item,id) => <Text key={id} style={[styles.all,styles.orderDescript]}>{item}</Text>)
-              : null}
-          </View>
-          {props.nowOrder.status == 'inRating'
-            ? <View>
-                <Text style={[styles.all,styles.orderDescript,styles.bold]}>Ваша оценка:</Text>
-                <View style={[styles.starsRow,styles.fd_r,styles.ai_c,styles.jc_sb,{marginBottom:fontSizeMain*1.5}]}>
-                  {[...Array(5)].map((item,id) => {
-                      if(props.user.status == 'client'){
-                        return(
-                          <Pressable key={id} onPress={() => setRatingBeforeAgree(id+1)}>
-                              <AntDesign name="star" size={fontSizeMain*1.8} color={props.nowOrder.rating > id || rating > id ? "#ffc36d" : '#B8B8B8'} />
-                          </Pressable>)
-                      } else {
-                        return(
-                          <AntDesign name="star" key={id} size={fontSizeMain*1.8} color={props.nowOrder.rating > id || rating > id ? "#ffc36d" : '#B8B8B8'} />
-                          )
-                      }
-                    })}
-                </View>
-
-                {props.user.status=='client'
-                  ? <View>
-                      <Text style={[styles.all,styles.orderDescript,styles.bold]}>Ваш комментарий</Text>
-                      <FormInput
-                        options={{
-                             placeholder:'Комментарий',
-                             onChangeText:(text)=>{setComment(text)}
-                          }}
-                         styleInput = {[styles.all,styles.input]}
-                       />
-                    </View>
-                  : null}
-              </View>
-            : null
-          }
-          <View style={styles.orderDescriptGroup}>
-            {props.user.status == 'client'
-              ? <Text style={[styles.all,styles.orderDescript]}>
-                  <Text style={[styles.all,styles.orderDescript,styles.bold]}>Вы заплатили: </Text>
-                  {currencySpelling(props.nowOrder.amount)}
-                </Text>
-              : <View>
-                  <Text style={[styles.all,styles.orderDescript]}>
-                    <Text style={[styles.all,styles.orderDescript,styles.bold]}>Бонус за 5 звезд: </Text>
-                    20 виженов
-                  </Text>
-                  <Text style={[styles.all,styles.orderDescript]}>
-                    <Text style={[styles.all,styles.orderDescript,styles.bold]}>Бонус за срочность: </Text>
-                    15 виженов
-                  </Text>
-                  <Text style={[styles.all,styles.orderDescript]}>
-                    <Text style={[styles.all,styles.orderDescript,styles.bold]}>Вы получите: </Text>
-                    {currencySpelling(20 + props.nowOrder.quickly)}
-                  </Text>
-                </View>
-              }
-          </View>
-          {noCompleteOrder && props.user.status == 'client'
-            ? <Text style={[styles.all,styles.boldest,styles.redColor,{fontSize:fontSizeMain*0.8,marginBottom:fontSizeMain}]}>
-                Необходимо поставить оценку от одного до пяти
-              </Text>
-            : null}
-          {noCompulsoryCommets
-            ? <Text style={[styles.all,styles.boldest,styles.redColor,{fontSize:fontSizeMain*0.8,marginBottom:fontSizeMain}]}>
-                При оценке ниже 4 нужно написать, что не так, чтобы мы могли подобрать вам другого мастера
-              </Text>
-            : null}
-          {props.user.status == 'designer'
-            ? props.nowOrder.status == 'inWork'
-              ? <Button title='Отправить' onPress={completeOrders}/>
-              : <View style={[styles.statusRatingBlock,styles.p_fsm,styles.ai_c,styles.fd_r]}>
-                  <Text style={[styles.whiteColor,styles.all]}>На оценке</Text>
-                </View>
-            : props.nowOrder.status == 'inRating'
-              ? <Button title='Оценить' onPress={()=>setRatingAgree()}/>
-              : null}
-        </View>
-      </View>}
-      </ScrollView>
-    )
+        :
+        <View style={styles.p_fsm}>
+          <Button title='Обновить' onPress={()=>reloadOrders(props.user.orders,dispatch,props.user)} style={{marginBottom:fontSizeMain}}/>
+          {Object.keys(props.nowOrder).map((item,i)=>{
+            return <OrderInfoNow
+                      i = {i}
+                      state = {state}
+                      setState= {setState}
+                      key = {i}
+                      nowOrder={props.nowOrder[item]}
+                      completeOrders={completeOrders}
+                      setRatingAgree = {setRatingAgree}/>
+          })}
+        </View>}
+        </ScrollView>
+      )
   }
 
   let mapStoreToProps = (store) => ({
     user:store.register.user,
     nowOrder:store.register.nowOrder,
-    oldOrders:store.register.oldOrders
+    oldOrders:store.register.oldOrders,
+    allVisibleImgInGallery: store.register.allVisibleImgInGallery
   })
 
   export default connect(mapStoreToProps)(NowOrders)

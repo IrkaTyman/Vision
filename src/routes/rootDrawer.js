@@ -18,9 +18,11 @@ import AllClientsStack from './allClientsStack'
 import BalanceStack from './balanceStack'
 import BalanceClientStack from './balanceClientStack'
 import ReferenceStack from './referenceStack'
+import SupportStack from './supportStack'
+import SupportModeratorStack from './supportModeratorStack'
 
 const Drawer = createDrawerNavigator()
-export const RootDrawerNavigation = (props) => {
+const RootDrawerNavigation = (props) => {
   return(
     !props.moderator ?
     <Drawer.Navigator drawerContent={ props =><DrawerContent {...props}/>}>
@@ -31,13 +33,17 @@ export const RootDrawerNavigation = (props) => {
       <Drawer.Screen name='BalanceClient' component={BalanceClientStack}/>
       <Drawer.Screen name='BalanceDesigner' component={BalanceStack}/>
       <Drawer.Screen name='Reference' component={ReferenceStack}/>
+      <Drawer.Screen name='Support' component={SupportStack}/>
     </Drawer.Navigator>
     :
     <Drawer.Navigator drawerContent={ props =><DrawerContentModerator {...props}/>}>
       <Drawer.Screen name='AllOrders' component={AllOrdersStack}/>
-      <Drawer.Screen name='AllDesigners' component={AllDesignersStack}/>
-      <Drawer.Screen name='AllClients' component={AllClientsStack}/>
+      <Drawer.Screen name='designer' component={AllDesignersStack}/>
+      <Drawer.Screen name='client' component={AllClientsStack}/>
       <Drawer.Screen name='Reference' component={ReferenceStack}/>
+      <Drawer.Screen name='SupportModerator' component={SupportModeratorStack}/>
     </Drawer.Navigator>
   )
 }
+
+export default RootDrawerNavigation

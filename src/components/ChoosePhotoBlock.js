@@ -5,7 +5,6 @@ import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 
 export const ChoosePhotoBlock = ({moderator,handler,style,status}) => {
-
   useEffect(() => {
     (async () => {
       if (Platform.OS !== 'web') {
@@ -16,14 +15,12 @@ export const ChoosePhotoBlock = ({moderator,handler,style,status}) => {
       }
     })();
   }, []);
-
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
     });
     handler(result)
   }
-
   return(
     <Pressable
         onPress={()=>{

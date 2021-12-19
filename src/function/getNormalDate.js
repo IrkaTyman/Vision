@@ -1,7 +1,6 @@
 const returnRightNum = (num) => {
   return num.length == 1 ? '0'+num : num
 }
-
 export const getNormalDate = (getDate,longDate=true) => {
   if(getDate){
     let date = new Date(getDate)

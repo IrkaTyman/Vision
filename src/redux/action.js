@@ -35,5 +35,5 @@ export const changeIndexImgGallery = (page) => {
   return {type:'register/set_index_img_gallery', payload:page}
 }
 export const changeCountImgInGallery = (page) => {
-  return {type:'register/set_count_img_in_ gallery', payload:page}
+  return {type:'register/set_count_img_in_gallery', payload:page}
 }

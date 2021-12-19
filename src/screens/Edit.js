@@ -2,7 +2,9 @@ import React,{useState, useEffect} from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useForm, Controller } from "react-hook-form";
-import firebase from 'firebase'
+import firebase from 'firebase/app'
+import 'firebase/database'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 //REDUX
 import {connect,useSelector,useDispatch} from 'react-redux'
@@ -50,6 +52,11 @@ const Edit = (props) => {
      dataUser.img = imgSrc
      dispatch(addPerson(dataUser))
      setImage('')
+     /******** ДОДЕЛАТЬ ИЗМЕНЕНИЕ ПОЧТЫ ************/
+    const user = {email:dataUser.email,password:dataUser.password}
+    let userJSON = JSON.stringify(user)
+    await AsyncStorage.setItem('@storage_user',userJSON)
+
      state == 0 ? setState(1) : setState(0)
      firebase.database().ref('users/' + dataUser.uid).set(dataUser);
      props.navigation.goBack()
@@ -63,10 +70,8 @@ const Edit = (props) => {
       aspect: [4, 3],
       quality: 1,
     });
-    console.log(2)
     if (!result.cancelled) {
       setImage(result.uri);
-      console.log(result.uri)
     }
   };
   async function uploadImageAvatarAsync(image) {

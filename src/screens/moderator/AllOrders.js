@@ -1,15 +1,14 @@
 import React from 'react';
-import {Image, Text, View, ScrollView, FlatList} from 'react-native';
+import {Text, View, ScrollView, FlatList,Pressable} from 'react-native';
 import {Button} from '../../components/Button'
 import OrderInfoAll from '../../components/OrderInfoAll'
 
 import {connect,useSelector,useDispatch} from 'react-redux'
 import {actionCreators as actions,addPerson} from '../../redux/action'
-import {styles,colors} from '../../components/Style'
+import {styles,colors,fontSizeMain} from '../../components/Style'
 
  const AllOrders = ({user,navigation,allOrders}) => {
    let date = Date.now()
-
    const getOrderType = (dateComplete) => {
      let dateOddsMinute = Math.floor((dateComplete - date)/60000)
      if(dateOddsMinute > 240) return styles.orderColorMore2Hour
@@ -31,7 +30,17 @@ import {styles,colors} from '../../components/Style'
             <View style={[styles.orderColorModerator,styles.orderColorMin5Minute]}></View>
             <Text style={[styles.whiteColor, styles.all]}>{'< 15 мин'}</Text>
           </View>
-
+        </View>
+        <View style={[styles.fd_r,styles.jc_sb,styles.ai_c,{marginBottom:fontSizeMain}]}>
+          <Pressable >
+            <Text style={[styles.all,styles.redColor,styles.bold]}>По дате</Text>
+          </Pressable>
+          <Pressable>
+            <Text style={[styles.all,styles.redColor,styles.bold]}>Не готовые</Text>
+          </Pressable>
+          <Pressable>
+            <Text style={[styles.all,styles.redColor,styles.bold]}>Готовые</Text>
+          </Pressable>
         </View>
         {allOrders[0] ?
           <FlatList

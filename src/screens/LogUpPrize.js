@@ -2,7 +2,7 @@ import React,{useState} from 'react';
 import {Image, Text, View} from 'react-native';
 import {Button} from '../components/Button'
 import {styles,fontSizeMain} from '../components/Style'
-import {RootDrawerNavigation} from '../routes/rootDrawer'
+import RootDrawerNavigation from '../routes/rootDrawer'
 import {Congrat} from '../components/SVG'
 
  const LogUpPrize = (props) => {

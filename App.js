@@ -1,10 +1,14 @@
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
+import {View,Image} from 'react-native'
 import * as Font from 'expo-font';
 import { NavigationContainer } from '@react-navigation/native';
-import firebase from 'firebase'
+import firebase from 'firebase/app'
+import 'firebase/firestore'
+import * as logo from './assets/logo.png'
 //Redux
 import {createStore} from 'redux'
+import {colors} from './src/components/Style'
 import {Provider} from 'react-redux'
 import {rootReducer} from './src/redux/rootReducer'
 import {addFaceParameters,addBodyParameters} from './src/redux/action'
@@ -14,7 +18,7 @@ const store = createStore(rootReducer)
 
 //Components
 import Application from './Application'
-import SplashScreen from './src/screens/SplashScreen'
+// import SplashScreen from './src/screens/SplashScreen'
 
 //Fonts
 let customFonts = {
@@ -77,17 +81,22 @@ export default class App extends React.Component {
       this.setState({ isOpen: true })
     }
   }
+  // async loadFetch(){
+  //   await fetch('https://panel.netangels.ru/cloud/vm/67859/home/web/p.fotou.expert/www/paykeeper/getLink.php',{method:'POST',mode:"no-cors",body:JSON.stringify({summa:52,clientId:2,orderId:12,})})
+  //     .then((res) => console.log(res))
+  // }
 
   render(){
-    if(this.state.isOpen){
-      return (
+    return (
+      this.state.isOpen ?
         <NavigationContainer>
           <Provider store = {store}>
               <Application/>
           </Provider>
         </NavigationContainer>
-      );
-    }
-    return(<SplashScreen/>)
-  }
+        : <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center',backgroundColor:colors.darkBeige}}>
+          <Image source={require('./assets/logo.png')} style={{width:'100%',height:30}} resizeMode='contain'/>
+        </View>
+      )}
+    // return }
 }

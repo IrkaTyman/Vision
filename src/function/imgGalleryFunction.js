@@ -1,20 +1,20 @@
-import firebase from 'firebase'
+import firebase from 'firebase/app'
+import 'firebase/database'
 import {addOldOrders,changeCountImgInGallery} from '../redux/action'
 import * as MediaLibrary from 'expo-media-library';
 import * as FileSystem from 'expo-file-system';
 import {Share} from 'react-native';
 
-export const deleteImgGallery = (dispatch, arrImg, oldOrders,allVisibleImgInGallery, setLongPress) => {
+export const deleteImgGallery = (dispatch, arrImg, oldOrders,allVisibleImgInGallery, setLongPress,userStatus) => {
   let allVisibleImg = allVisibleImgInGallery
   arrImg.map((item,i) => {
-    oldOrders[item].visiblePhoto = false
+    oldOrders[item][`visiblePhoto${userStatus}`] = false
     delete allVisibleImg[item]
-    firebase.database().ref(`orders/${oldOrders[item].id-1}/`).update({visiblePhoto:false})
+    firebase.database().ref(`orders/${oldOrders[item].id}/`).update({[`visiblePhoto${userStatus}`]:false})
   })
-  console.log(arrImg,allVisibleImg)
   dispatch(addOldOrders(oldOrders))
   dispatch(changeCountImgInGallery(allVisibleImg))
-  setLongPress()
+  setLongPress(false)
 }
 
 const saveFile = async (fileUri: string) => {
@@ -26,7 +26,6 @@ export const downloadImg = (uri,indexImgGallery) => {
   const fileUri = FileSystem.documentDirectory + `${indexImgGallery}-1.jpg`;
   FileSystem.downloadAsync(uri, fileUri)
   .then(({ uri }) => {
-
       saveFile(uri);
     })
     .catch(error => {
@@ -39,12 +38,6 @@ export const shareImg = async (text) => {
     const result = await Share.share({
       message:text
     });
-    if (result.action === Share.sharedAction) {
-      console.log('cool')
-    } else if (result.action === Share.dismissedAction) {
-      console.log('not cool')
-    }
   } catch (error) {
     alert(error.message);
-  }
-}
+  }}

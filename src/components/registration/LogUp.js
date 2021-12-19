@@ -117,8 +117,8 @@ export const LogUp = (props) => {
                    placeholder:'Пароль',
                    onChangeText:(text) => onChange(text),
                    value:value,
-                   secureTextEntry:true
                 }}
+                secure ={ true}
                styleInput = {[styles.all,styles.input,styles.regInput,styles.regInputLogUp]}
                onChangeText={(text) => onChange(text)}
                value={value}

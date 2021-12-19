@@ -58,8 +58,8 @@ export const LogIn = (props) => {
                    placeholder:'Пароль',
                    onChangeText:(text) => onChange(text),
                    value:value,
-                   secureTextEntry:true
                 }}
+               secure ={ true}
                styleInput = {[styles.all,styles.input,styles.regInput]}
                onChangeText={(text) => onChange(text)}
                value={value}

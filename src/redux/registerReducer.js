@@ -14,8 +14,12 @@ const initialState = {
   nowOrder:{},
   oldOrders:[],
   allOrders:[],
-  allClients:[],
-  allDesigners:[],
+  allUsers:{},
+  messagesAutor:'',
+  readUserMessage:true,
+  resolveIssueModerator:{},
+  messages:[],
+  allMessages:{},
   indexImgGallery:0,
   allVisibleImgInGallery:{},
 }
@@ -37,7 +41,9 @@ export default function registerReducer(state = initialState,action){
           balance:action.payload.balance,
           id:action.payload.id,
           subscription:action.payload.subscription,
-          orders:action.payload.orders || []
+          canSubsc:action.payload.canSubsc,
+          orders:action.payload.orders || [],
+          blocked:action.payload.blocked
         },
         isLogin:true
       }
@@ -81,7 +87,7 @@ export default function registerReducer(state = initialState,action){
     case 'register/set_index_img_gallery':
       return{...state,
         indexImgGallery:action.payload}
-    case 'register/set_count_img_in_ gallery':
+    case 'register/set_count_img_in_gallery':
       return{...state,
         allVisibleImgInGallery:action.payload}
 

@@ -1,25 +1,72 @@
 import {createStackNavigator} from '@react-navigation/stack';
 import {createAppContainer} from 'react-navigation';
-import AllDesigners from '../screens/moderator/AllDesigners';
+import AllClientsOrDesigner from '../screens/moderator/AllClientOrDesigner';
+import ProfileOfUser from '../screens/moderator/ProfileOfUser';
+import GalleryMiniForModerator from '../screens/moderator/GalleryMiniForModerator'
+import Support from '../screens/Support'
+import GalleryBig from '../screens/GalleryBig';
 import Edit from '../screens/Edit';
 import Header from '../components/Header'
 import React from 'react'
 import {Text} from 'react-native'
 import {fontSizeMain,styles} from '../components/Style'
+import OrdersOfUser from '../screens/moderator/OrdersOfUser'
+import {connect} from 'react-redux'
 
 const Stack = createStackNavigator()
 
-const allDesignersStack = () => {
+const allDesignersStack = ({indexImgGallery,allUsers,messagesAutor}) => {
+  const indexImg = indexImgGallery +1
   return(
     <Stack.Navigator >
       <Stack.Screen
-        name="allDesigners"
-        component={AllDesigners}
+        name="designer"
+        component={AllClientsOrDesigner}
         options={(props) =>
           {return {headerTitle: <Header nav={props.navigation} title="Дизайнеры"/>,
                     headerStyle:{backgroundColor:'#A57474'},
                     animationEnabled:false}}
         }
+      />
+      <Stack.Screen
+        name="ordersOfUser"
+        component={OrdersOfUser}
+        options={{headerTitle:props => <Text style={[styles.all,styles.whiteColor]}>Заказы</Text>,
+                  headerTintColor:'#fff',
+                  headerStyle:{backgroundColor:'#A57474',},
+                  animationEnabled:false}}
+      />
+      <Stack.Screen
+        name="profileOfUser"
+        component={ProfileOfUser}
+        options={{headerTitle:props => <Text style={[styles.all,styles.whiteColor]}>Профиль</Text>,
+                  headerTintColor:'#fff',
+                  headerStyle:{backgroundColor:'#A57474',},
+                  animationEnabled:false}}
+      />
+      <Stack.Screen
+        name="galleryMini"
+        component={GalleryMiniForModerator}
+        options={{headerTitle:props => <Text style={[styles.all,styles.whiteColor]}>Галерея</Text>,
+                  headerTintColor:'#fff',
+                  headerStyle:{backgroundColor:'#A57474',},
+                  animationEnabled:false}}
+      />
+      <Stack.Screen
+        name="galleryBig"
+        component={GalleryBig}
+        options={{headerTitle:props => <Text style={[styles.all,styles.whiteColor,{fontSize:fontSizeMain*1.1}]}>{indexImg}</Text>,
+                  headerTintColor:'#fff',
+                  headerStyle:{backgroundColor:'#A57474',},
+                  animationEnabled:false}}
+      />
+      <Stack.Screen
+        name="Support"
+        component={Support}
+        options={{headerTitle:props =><Text style={[styles.all,styles.whiteColor]}>{allUsers[messagesAutor].username}</Text>,
+                  headerTintColor:'#fff',
+                  headerStyle:{backgroundColor:'#A57474',},
+                  animationEnabled:false}}
       />
       <Stack.Screen
         name="Edit"
@@ -32,5 +79,10 @@ const allDesignersStack = () => {
     </Stack.Navigator>
   )
 }
+let mapStoreToProps = (store) => ({
+  indexImgGallery:store.register.indexImgGallery,
+  allUsers:store.register.allUsers,
+  messagesAutor:store.register.messagesAutor
+})
 
-export default allDesignersStack
+export default connect(mapStoreToProps)(allDesignersStack)

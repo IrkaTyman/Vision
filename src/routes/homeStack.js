@@ -2,7 +2,7 @@ import {createStackNavigator} from '@react-navigation/stack';
 import {createAppContainer} from 'react-navigation';
 import Home from '../screens/Home';
 import Edit from '../screens/Edit';
-import OldPhoto from '../screens/OldPhoto';
+import NewOrders from '../screens/NewOrders';
 import GalleryBig from '../screens/GalleryBig';
 import GalleryMini from '../screens/GalleryMini';
 import Header from '../components/Header'
@@ -34,6 +34,15 @@ const HomeStack = (props) => {
                   headerTintColor:'#fff',
                   headerStyle:{backgroundColor:'#A57474',},
                   animationEnabled:false}}
+      />
+      <Stack.Screen
+        name="newOrders"
+        component={NewOrders}
+        options={(props) =>
+          {return {headerTitle: <Header nav={props.navigation} title="Новый заказ"/>,
+                    headerStyle:{backgroundColor:'#A57474'},
+                    animationEnabled:false}}
+        }
       />
       <Stack.Screen
         name="GalleryMini"

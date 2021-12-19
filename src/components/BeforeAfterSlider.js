@@ -56,7 +56,7 @@ const After = (props) => (
 const DefaultDragger = (props) => (
   <View {...props.parent._panResponder.panHandlers} style={[styles.draggerContainer,{height: props.state.height, left: props.state.left}]}>
     <View style={[styles.dragger,styles.ai_c,styles.jc_c,{marginTop: (props.state.height/2-fontSizeMain*1.3)}]}>
-      <Ionicons name="code-outline" size={fontSizeMain*1.2} color="#fff"/>
+      <Ionicons name="code-outline" size={fontSizeMain*1.2} color={colors.lightGrey}/>
     </View>
     <View style={[styles.stickDragger,{height: props.state.height}]}></View>
   </View>
@@ -84,7 +84,7 @@ class Compare extends Component {
       onMoveEnd
     };
   }
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this._panResponder = PanResponder.create({
       onMoveShouldSetResponderCapture: () => true,
       onMoveShouldSetPanResponderCapture: () => true,
@@ -140,10 +140,10 @@ export const BeforeAfterSlider = (props) => {
   return(
       <Compare width={props.width} height={props.height} onMoveStart={onMoveStart} onMoveEnd={onMoveEnd}>
         <Before>
-          <Image source={{uri:props.photo[0]}} style={{width:props.width,height:props.height}} />
+          <Image source={{uri:props.photo[0]}} style={{width:props.width,height:props.height,backgroundColor:"#fff"}} />
         </Before>
         <After>
-          <Image source={{uri:props.photo[1]}} style={{width:props.width, height: props.height}} />
+          <Image source={{uri:props.photo[1]}} style={{width:props.width, height: props.height,backgroundColor:"#fff"}} />
         </After>
         <DefaultDragger />
       </Compare>

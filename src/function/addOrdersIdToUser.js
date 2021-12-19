@@ -1,5 +1,6 @@
-import firebase from 'firebase'
-import {removePerson,addPerson} from '../redux/action'
+import firebase from 'firebase/app'
+import 'firebase/database'
+import {addPerson} from '../redux/action'
 
 export const addOrdersIdToUser = (user,dispatch,id) => {
   let userOrders = user.orders || []

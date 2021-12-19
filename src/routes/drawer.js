@@ -4,13 +4,16 @@ import {
   DrawerItem,
   createDrawerNavigator
 } from '@react-navigation/drawer';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {createAppContainer} from 'react-navigation';
 import {Text,View,Image,Pressable} from 'react-native'
 import {FontAwesome} from '@expo/vector-icons'
 import {connect, useDispatch} from 'react-redux'
-import {addPerson,removePerson,addNowOrder,addOldOrders} from '../redux/action'
+import {addPerson,removePerson,addNowOrder,addOldOrders,addAllST} from '../redux/action'
 import {Svg,Path,Circle} from 'react-native-svg'
-import firebase from 'firebase'
+import firebase from 'firebase/app'
+import 'firebase/database'
+import 'firebase/firestore'
 import {addOrdersIdToUser} from '../function/addOrdersIdToUser'
 
 import {styles,fontSizeMain} from '../components/Style'
@@ -19,11 +22,13 @@ import {Home,Cart,Wallet,Support,Question} from '../components/SVG'
 
 const DrawerContent = (props) => {
   const user = props.user
+  const readUserMessage = props.readUserMessage
   const dispatch = useDispatch()
   let [state,setState] = useState(0)
   const db= firebase.database().ref('orders')
+
   const takeNewOrder = () => {
-    if(!props.nowOrder.clientUID){
+    if(!props.nowOrder[Object.keys(props.nowOrder)[0]]){
       db.orderByChild('designerUID').equalTo('').get().then((snap)=>{
         if(snap.exists()){
           let date = new Date()
@@ -38,23 +43,28 @@ const DrawerContent = (props) => {
             }
           })
           order.designerUID = user.uid
-          order.designerName = `${user.username} ${user.surname}`
           order.amountDesigner = 20 + order.quickly
           order.dateTake = date.getTime()
           firebase.database().ref('orders/'+id).set(order)
           addOrdersIdToUser(user,dispatch,id)
-          dispatch(addNowOrder(order))
+          dispatch(addNowOrder({[id]:order}))
         }
       }).catch((err)=>console.log(err))
       props.navigation.navigate('NowOrders')
     }
   }
-  const signOut = () => {
+  const signOut = async() => {
     dispatch(addNowOrder({}))
     dispatch(addOldOrders([]))
     dispatch(removePerson('Log out'))
+    await AsyncStorage.removeItem('@storage_user')
   }
-
+  function readMessage(){
+    if(!props.readUserMessage) {
+      firebase.firestore().collection('messages_tree').doc(props.user.uid+'').update({readUserMessage:true})
+      dispatch(addAllST({who:'readUserMessage',what:true}))
+    }
+  }
   return(
     <View style={[styles.flex,styles.drawer,styles.p_fsm]}>
     <DrawerContentScrollView>
@@ -71,7 +81,7 @@ const DrawerContent = (props) => {
         <DrawerItem
           label='Профиль'
           icon = { () => <Home width={fontSizeMain} height={fontSizeMain}/>}
-          onPress={() => props.navigation.navigate('Home')}
+          onPress={() => props.navigation.reset({index: 0,routes: [{ name: 'Home' }]})}
           labelStyle = {styles.all}
         />
         <View style={styles.drawerOrdersWrapper}>
@@ -102,12 +112,17 @@ const DrawerContent = (props) => {
           onPress={() => user.status=='designer' ? props.navigation.navigate('BalanceDesigner') : props.navigation.navigate('BalanceClient')}
           labelStyle = {styles.all}
         />
-        <DrawerItem
-          label='Поддержка'
-          icon = { () => <Support width={fontSizeMain} height={fontSizeMain}/>}
-          onPress={() => props.navigation.navigate('Home')}
-          labelStyle = {styles.all}
-        />
+        <View style={{position:'relative'}}>
+          <View style={readUserMessage ? {} : styles.activeMessageDot}></View>
+          <DrawerItem
+            label='Поддержка'
+            icon = { () => <Support width={fontSizeMain} height={fontSizeMain}/>}
+            onPress={() => {
+              readMessage()
+              props.navigation.navigate('Support')}}
+            labelStyle = {styles.all}
+          />
+        </View>
         <DrawerItem
           label='Справка'
           icon = { () => <Question width={fontSizeMain} height={fontSizeMain}/>}
@@ -131,7 +146,8 @@ const DrawerContent = (props) => {
 let mapStoreToProps = (store) => ({
   user:store.register.user,
   nowOrder:store.register.nowOrder,
-  oldOrders:store.register.oldOrders
+  oldOrders:store.register.oldOrders,
+  readUserMessage:store.register.readUserMessage
 })
 
 export default connect(mapStoreToProps)(DrawerContent)

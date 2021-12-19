@@ -1,4 +1,5 @@
-import firebase from 'firebase'
+import firebase from 'firebase/app'
+import 'firebase/storage'
 
 export const uploadImageAsync = async (image,id) => {
   const blob = await new Promise((resolve, reject) => {

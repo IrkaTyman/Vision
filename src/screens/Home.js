@@ -2,23 +2,110 @@ import React,{useState,useEffect} from 'react';
 import {Image, Text, View, ScrollView, Pressable, Dimensions} from 'react-native';
 import {Button} from '../components/Button'
 import {connect,useDispatch} from 'react-redux'
-import {styles,fontSizeMain,SCREEN_WIDTH} from '../components/Style'
-import {changeIndexImgGallery,changeCountImgInGallery} from '../redux/action'
+import {styles,fontSizeMain,SCREEN_WIDTH,colors} from '../components/Style'
+import {changeIndexImgGallery,changeCountImgInGallery,addNowOrder,addOldOrders,withdrawMoney} from '../redux/action'
 import {currencySpelling} from '../function/currencySpelling'
-import { AntDesign } from '@expo/vector-icons';
+import { AntDesign,Feather } from '@expo/vector-icons';
+import firebase from 'firebase/app'
+import 'firebase/database'
+import 'firebase/firestore'
 
- const Home = ({user,navigation,allVisibleImgInGallery}) => {
+ const Home = ({user,navigation,allVisibleImgInGallery,nowOrder,oldOrders,allMessages}) => {
    const dispatch=useDispatch()
    const [state,setState] =useState(0)
+   let [nowOrderId,setNowOrder] = useState([])
+
+   useEffect(()=>{
+     if(user.status == 'designer'){
+       addListener('',firebase.database().ref('users/' + user.uid + '/balance'),'user')
+    //return ()=> {clearTimeout(timer)}
+     }},[])
+
+  // useEffect(()=>{
+  //    if(nowOrderId.join(' ') != Object.keys(nowOrder).join(' ')){
+  //      let newIdArr = []
+  //      let origNowOrder = Object.keys(nowOrder)
+  //      for(let i of origNowOrder){
+  //        newIdArr.push(i)
+  //        if(nowOrderId.indexOf(i) == -1){
+  //          addListener(i,firebase.database().ref('orders/' + (i)),'order')
+  //        }
+  //      }
+  //      setNowOrder(newIdArr)
+  //    }
+  //  },[nowOrderId])
 
    const setIndexImgGallery = (page) => {
-     console.log(page)
      dispatch(changeIndexImgGallery(page))
      navigation.navigate('GalleryBig',{setState,state})
    }
+   function addListener(id,ref,type){
+     deleteListener(ref)
+     let statusRef = ref
+     let nowOrders = nowOrder
+     if(type == 'order'){
+      //  statusRef.on('value', (snapshot) => {
+      //    let data = snapshot.val()
+      //    if (data){
+      //      if(data.status == 'inComplete'){
+      //          deleteListener(ref)
+      //          let oldOrders = oldOrders || []
+      //          let allVisibleImg = allVisibleImgInGallery
+      //          if(oldOrders[oldOrders.length-1]){
+      //            if(oldOrders[oldOrders.length-1].id != data.id){
+      //              oldOrders.push(data)
+      //              allVisibleImg[data.id] = data.afterImg
+      //              dispatch(addOldOrders(oldOrders))
+      //              dispatch(changeCountImgInGallery(allVisibleImg))
+      //            }
+      //        } else {
+      //          oldOrders.push(data)
+      //          allVisibleImg[data.id] = data.afterImg
+      //          dispatch(addOldOrders(oldOrders))
+      //          dispatch(changeCountImgInGallery(allVisibleImg))
+      //        }
+      //        delete nowOrders[id]
+      //        dispatch(addNowOrder(nowOrders))
+      //      } else if(data.status != nowOrders[id].status || data.designerUID != nowOrders[id].designerUID){
+      //          nowOrder[id] = data
+      //          dispatch(addNowOrder(nowOrder))
+      //       }
+      //    }})
+      }
+     else {
+       statusRef.on('value',(snap) => {
+         let data = snap.val()
+         dispatch(withdrawMoney(data))
+       })
+     }
+   }
+   function deleteListener(ref){
+     let statusRef = ref
+     statusRef.off()
+   }
+
+   // if(nowOrderId.join(' ') != Object.keys(nowOrder).join(' ')){
+   //   let newIdArr = []
+   //   let origNowOrder = Object.keys(nowOrder)
+   //   for(let i of origNowOrder){
+   //     newIdArr.push(i)
+   //     if(nowOrderId.indexOf(i) == -1){
+   //       addListener(i,firebase.database().ref('orders/' + (i)),'order')
+   //     }
+   //   }
+   //   setNowOrder(newIdArr)
+   //   state == 0 ? setState(1) : setState(0)
+   // }
+   // if(user.status == 'designer'){
+   //   addListener('',firebase.database().ref('users/' + user.uid + '/balance'),'user')
+   // }
+
     return (
       <ScrollView style={[styles.container,styles.profileWrapper]}>
-        <View style={[styles.profileBlock,styles.p_fsm]}>
+        <View style={[styles.profileBlock,styles.p_fsm,{position:'relative'}]}>
+          <Pressable onPress={() => navigation.navigate('Edit')} style={styles.editIcon}>
+            <Feather name="settings" size={fontSizeMain*1.3} color={colors.red} />
+          </Pressable>
           <View style={[styles.profileInfoAbout,styles.fd_r]}>
             <Image source = {{uri:user.img}} style={[styles.avaImg,{width:100,height:100}]}/>
             <View style={[styles.profileInfoTextView,styles.p_fsm,styles.jc_c]}>
@@ -29,20 +116,22 @@ import { AntDesign } from '@expo/vector-icons';
               </Text>
             </View>
           </View>
-          <Button title='Редактировать' onPress={() => navigation.navigate('Edit')}/>
+          <Button title='Новый заказ' onPress={() => navigation.reset({index: 0,routes: [{ name: 'newOrders' }]})}/>
         </View>
         <View style={[styles.profileBlock,styles.p_fsm]} >
           <Pressable style={[styles.fd_r,styles.jc_sb]}
-            onPress={()=>{navigation.navigate('GalleryMini',{setState,state})}} >
+            onPress={()=>navigation.navigate('GalleryMini',{setState,state})} >
             <Text style={[styles.all,styles.h3]}>Готовые фото <Text style={styles.darkPinkColor}>{Object.keys(allVisibleImgInGallery).length}</Text></Text>
             <AntDesign style={{marginBottom:fontSizeMain,marginLeft:fontSizeMain*0.7}} name={'right'} size={fontSizeMain} color="#000" />
           </Pressable>
           <View style={styles.gallery_wrap}>
           {Object.keys(allVisibleImgInGallery)[0]
             ? Object.keys(allVisibleImgInGallery).map((item, i) => {
+              if (i < 3 || (i < 4 && SCREEN_WIDTH > 600)){
                 return <Pressable key={i} onPress={()=>setIndexImgGallery(i)}>
                       <Image  source={{uri:allVisibleImgInGallery[item]}} style={styles.galleryHome_img}/>
-                    </Pressable>})
+                    </Pressable>}
+                  })
             : <Text style={[styles.all,styles.bold,styles.darkPinkColor]}>
                 Пока здесь ничего нет
               </Text>}
@@ -58,6 +147,9 @@ Home.navigationOptions = {
 
 let mapStoreToProps = (store) => ({
   user:store.register.user,
+  oldOrders:store.register.oldOrders,
+  nowOrder:store.register.nowOrder,
+  allMessages:store.register.allMessages,
   allVisibleImgInGallery:store.register.allVisibleImgInGallery
 })
 
