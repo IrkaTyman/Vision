@@ -6,7 +6,7 @@ import {connect} from 'react-redux'
 import {styles} from '../../components/Style'
 
  const AllClientsOrDesigner = ({navigation,route,allUsers}) => {
-    const users = Object.keys(allUsers).filter(item => allUsers[item].status != route.name)
+    const users = Object.keys(allUsers).filter(item => allUsers[item].status == route.name)
     return (
       users[0] ?
           <FlatList

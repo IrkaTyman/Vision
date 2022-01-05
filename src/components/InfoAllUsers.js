@@ -37,7 +37,6 @@ const InfoAllUsers = ({data,nav,allOrders,allUsers}) => {
     dispatch(addAllST({who:'allUsers',what:arrUser}))
   }
   function getMessageByUser(){
-    console.log(data)
     dispatch(addAllST({who:'messagesAutor',what:data}))
     nav.navigate('Support',{userUID:data})
   }

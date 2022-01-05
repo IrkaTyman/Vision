@@ -23,7 +23,6 @@ export const Parameters = (props) => {
       setParameters(paramObj)
       setCountParam(countParam+1)
     }
-    console.log(paramObj)
   }
   return(
     <View style={[styles.bodyOrFaceWindow,styles.p_fsm]}>

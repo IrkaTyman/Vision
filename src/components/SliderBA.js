@@ -8,6 +8,7 @@ import {ChoosePhotoBlock} from './ChoosePhotoBlock'
 
 export const SliderBA = ({moderator,orderStatus,handlerDelete,handler,height,photo,userStatus,userId}) => {
   const [index,setIndex] = useState(0);
+  const [download,setDownload] = useState(false)
   const toLeafToTheRight = () => {
     setIndex((index+1)%2)
   }
@@ -20,6 +21,8 @@ export const SliderBA = ({moderator,orderStatus,handlerDelete,handler,height,pho
       .catch(error => {
         console.error(error);
       })
+        setDownload(true)
+        setTimeout(()=>setDownload(false),3000)
   }
   const saveFile = async (fileUri: string) => {
     const asset = await MediaLibrary.createAssetAsync(fileUri)
@@ -80,7 +83,7 @@ export const SliderBA = ({moderator,orderStatus,handlerDelete,handler,height,pho
                   bottom:-0.5*fontSizeMain
                 },styles.sliderBAArrow,styles.ai_c,styles.jc_c]}
           >
-            <Ionicons name="ios-download-outline" size={fontSizeMain*1.16} color="#fff" />
+            <Ionicons name={download ? "checkmark-outline" : "ios-download-outline"} size={fontSizeMain*1.16} color="#fff" />
           </Pressable>
         : null}
       {index == 1 && photo[index] && userStatus == 'designer' && orderStatus == 'inWork' && !moderator

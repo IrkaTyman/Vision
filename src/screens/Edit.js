@@ -63,7 +63,6 @@ const Edit = (props) => {
    }
 
   const pickImage = async () => {
-    console.log(1)
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,

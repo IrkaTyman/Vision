@@ -154,7 +154,6 @@ const deleteParam = (param,type) => {
         firebase.database().ref('users/' + user.uid).set(user);
         firebase.database().ref('orders/').limitToLast(1).get().then(async (snapshot) => {
           if(snapshot.exists()){
-            console.log(snapshot.val())
             id = +Object.keys(snapshot.val())[0]+1
           } else id = 0
           let uploadImg = await uploadImageAsync(image,id)
@@ -162,7 +161,6 @@ const deleteParam = (param,type) => {
           order.beforeImg = uploadImg
           let nowOrder = props.nowOrder
           nowOrder[id] = order
-          console.log(order)
           firebase.database().ref('orders/').child(id).set(order)
           addOrdersIdToUser(props.user, dispatch, order.id)
           dispatch(addNowOrder(nowOrder))

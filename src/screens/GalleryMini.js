@@ -15,7 +15,6 @@ const GalleryMini = (props) => {
   const [imgLongPress,setImgLongPress] = useState(()=> {
     let state = createObjImgLongPress()
     return state})
-console.log(props)
   function createObjImgLongPress(){
     const arrImg = {}
     Object.keys(props.allVisibleImgInGallery).map((item,i)=>{

@@ -1,14 +1,19 @@
 import React, { Component} from "react";
 import { View,Image, TouchableOpacity, Text, Platform,LayoutAnimation,UIManager} from "react-native";
+import {Button} from './Button'
 import { AntDesign } from '@expo/vector-icons';
 import {styles,fontSizeMain,sliderBAWidth} from './Style';
 import {SliderBA} from '../components/SliderBA'
 import {currencySpelling} from '../function/currencySpelling'
 import {getNormalDate} from '../function/getNormalDate'
 import {localeStatusOrder} from '../function/localeStatusOrder'
+import firebase from 'firebase/app'
+import 'firebase/database'
+import {reloadAllOrders} from '../function/reloadOrders'
 
 //REDUX
 import {connect,useSelector,useDispatch} from 'react-redux'
+import {addAllST} from '../redux/action'
 
 class OrderInfoAll extends Component {
   state = {
@@ -16,6 +21,7 @@ class OrderInfoAll extends Component {
     height:this.props.data.height,
     data:this.props.data,
     id:this.props.id,
+    comebackOrders:false
   }
 
   componentDidMount(){
@@ -26,6 +32,32 @@ class OrderInfoAll extends Component {
   toggleExpand = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     this.setState({...this.state,expanded:!this.state.expanded})
+  }
+  toComebackOrders = () => {
+    let order = this.state.data
+    let users = this.props.allUsers
+    if (order.designerUID != ''){
+      let ordersDesigner = users[order.designerUID].orders
+      let i = ordersDesigner.indexOf(order.id)
+      if (ordersDesigner.length == 1) ordersDesigner = []
+      else ordersDesigner = ordersDesigner.splice(i,1)
+      console.log(ordersDesigner,i)
+      users[order.designerUID].orders = ordersDesigner
+      this.props.dispatch(addAllST({who:'allUsers',what:users}))
+      firebase.database().ref('users/'+order.designerUID+'/orders').set(ordersDesigner)
+    }
+    order.designerUID = ''
+    order.status = 'inWork'
+    order.dateComplete = Date.now() + (order.quickly == 5 ? 900000 : 28800000)
+    order.amountDesigner = 0
+    delete order.dateTake
+    delete order.dateCompleteDesigner
+    delete order.rating
+    delete order.afterImg
+    delete order.comment
+    this.setState({...this.state,data:order,comebackOrders:false})
+    firebase.database().ref('orders/').child(order.id).set(order)
+    reloadAllOrders(this.props.dispatch)
   }
   render(){
     return (
@@ -53,8 +85,8 @@ class OrderInfoAll extends Component {
             <Text style={[styles.all,styles.orderDescript,styles.bold]}>Статус:<Text style={{color:'green'}}> {localeStatusOrder(this.state.data.status)}</Text></Text>
           </View>
           <View style={styles.orderDescriptGroup}>
-            <Text style={[styles.all,styles.orderDescript]}><Text style={[styles.all,styles.bold]}>Заказчик:</Text> {this.state.data.client}</Text>
-            <Text style={[styles.all,styles.orderDescript]}><Text style={[styles.all,styles.bold]}>Дизайнер</Text> {this.state.data.designer || '-'}</Text>
+            <Text style={[styles.all,styles.orderDescript]}><Text style={[styles.all,styles.bold]}>Заказчик:</Text> {this.props.allUsers[this.state.data.clientUID].username}</Text>
+            <Text style={[styles.all,styles.orderDescript]}><Text style={[styles.all,styles.bold]}>Дизайнер:</Text> {this.state.data.designerUID ? this.props.allUsers[this.state.data.designerUID].username : '-'}</Text>
           </View>
           <View style={styles.orderDescriptGroup}>
             <Text style={[styles.all,styles.orderDescript,styles.bold]}>Задание:</Text>
@@ -68,7 +100,7 @@ class OrderInfoAll extends Component {
                   )}
                 )}
           </View>
-          {this.state.data.comment != ''
+          {this.state.data.comment
             ? <View>
                 <Text style={[styles.all,styles.orderDescript,styles.bold]}>Комментарий к заказу</Text>
                 <Text style={[styles.all,{marginBottom:fontSizeMain*1.5}]}>{this.state.data.comment}</Text>
@@ -76,8 +108,18 @@ class OrderInfoAll extends Component {
             : null
           }
           <View style={styles.orderDescriptGroup}>
-            <Text style={[styles.all,styles.orderDescript]}><Text style={[styles.all,styles.orderDescript,styles.bold]}>{this.props.user.status == 'client' ? 'Вы заплатили: ' : this.props.user.status == 'designer' ? 'Вы заработали: ' : 'Стоимость'} </Text>{currencySpelling(this.state.data.amount)}</Text>
+            <Text style={[styles.all,styles.orderDescript]}><Text style={[styles.all,styles.orderDescript,styles.bold]}>Стоимость: </Text>{currencySpelling(this.state.data.amount)}</Text>
           </View>
+          {this.state.comebackOrders ?
+          <View style={styles.ai_c}>
+            <Text style={[styles.all,styles.redColor]}>Отправить заказ в очередь?</Text>
+            <View style={[styles.fd_r]}>
+              <Button title='Да' style={{margin:fontSizeMain}} onPress={this.toComebackOrders}/>
+              <Button title='Нет' style={{margin:fontSizeMain}} onPress={()=>this.setState({...this.state,comebackOrders:false})}/>
+            </View>
+
+          </View>
+            : <Button title='В очередь' onPress={()=>this.setState({...this.state,comebackOrders:true})}/>}
         </View>
       }
       </View>
@@ -85,7 +127,9 @@ class OrderInfoAll extends Component {
   }}
 
   let mapStoreToProps = (store) => ({
-    user:store.register.user
+    user:store.register.user,
+    allUsers:store.register.allUsers,
+    allOrders:store.register.allOrders
   })
 
   export default connect(mapStoreToProps)(OrderInfoAll)

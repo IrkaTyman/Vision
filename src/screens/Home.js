@@ -1,5 +1,5 @@
 import React,{useState,useEffect} from 'react';
-import {Image, Text, View, ScrollView, Pressable, Dimensions} from 'react-native';
+import {Image, Text, View, ScrollView, Pressable, Dimensions,Platform} from 'react-native';
 import {Button} from '../components/Button'
 import {connect,useDispatch} from 'react-redux'
 import {styles,fontSizeMain,SCREEN_WIDTH,colors} from '../components/Style'
@@ -9,6 +9,7 @@ import { AntDesign,Feather } from '@expo/vector-icons';
 import firebase from 'firebase/app'
 import 'firebase/database'
 import 'firebase/firestore'
+import {sendPushNotifications} from '../../server-operations'
 
  const Home = ({user,navigation,allVisibleImgInGallery,nowOrder,oldOrders,allMessages}) => {
    const dispatch=useDispatch()
@@ -18,22 +19,22 @@ import 'firebase/firestore'
    useEffect(()=>{
      if(user.status == 'designer'){
        addListener('',firebase.database().ref('users/' + user.uid + '/balance'),'user')
-    //return ()=> {clearTimeout(timer)}
      }},[])
 
-  // useEffect(()=>{
-  //    if(nowOrderId.join(' ') != Object.keys(nowOrder).join(' ')){
-  //      let newIdArr = []
-  //      let origNowOrder = Object.keys(nowOrder)
-  //      for(let i of origNowOrder){
-  //        newIdArr.push(i)
-  //        if(nowOrderId.indexOf(i) == -1){
-  //          addListener(i,firebase.database().ref('orders/' + (i)),'order')
-  //        }
-  //      }
-  //      setNowOrder(newIdArr)
-  //    }
-  //  },[nowOrderId])
+
+  useEffect(()=>{
+     // if(nowOrderId.join(' ') != Object.keys(nowOrder).join(' ')){
+     //   let newIdArr = []
+     //   let origNowOrder = Object.keys(nowOrder)
+     //   for(let i of origNowOrder){
+     //     newIdArr.push(i)
+     //     if(nowOrderId.indexOf(i) == -1){
+     //       addListener(i,firebase.database().ref('orders/' + (i)),'order')
+     //     }
+     //   }
+     //   setNowOrder(newIdArr)
+     // }
+   },[nowOrderId])
 
    const setIndexImgGallery = (page) => {
      dispatch(changeIndexImgGallery(page))
@@ -44,33 +45,22 @@ import 'firebase/firestore'
      let statusRef = ref
      let nowOrders = nowOrder
      if(type == 'order'){
-      //  statusRef.on('value', (snapshot) => {
-      //    let data = snapshot.val()
-      //    if (data){
-      //      if(data.status == 'inComplete'){
-      //          deleteListener(ref)
-      //          let oldOrders = oldOrders || []
-      //          let allVisibleImg = allVisibleImgInGallery
-      //          if(oldOrders[oldOrders.length-1]){
-      //            if(oldOrders[oldOrders.length-1].id != data.id){
-      //              oldOrders.push(data)
-      //              allVisibleImg[data.id] = data.afterImg
-      //              dispatch(addOldOrders(oldOrders))
-      //              dispatch(changeCountImgInGallery(allVisibleImg))
-      //            }
-      //        } else {
-      //          oldOrders.push(data)
-      //          allVisibleImg[data.id] = data.afterImg
-      //          dispatch(addOldOrders(oldOrders))
-      //          dispatch(changeCountImgInGallery(allVisibleImg))
-      //        }
-      //        delete nowOrders[id]
-      //        dispatch(addNowOrder(nowOrders))
-      //      } else if(data.status != nowOrders[id].status || data.designerUID != nowOrders[id].designerUID){
-      //          nowOrder[id] = data
-      //          dispatch(addNowOrder(nowOrder))
-      //       }
-      //    }})
+       let typeToken = ''
+       statusRef.on('value', (snapshot) => {
+         let data = snapshot.val()
+         if (data){
+           if(data.status == 'inComplete'){
+             deleteListener(ref)
+             typeToken='inComplete'
+               //Complete
+           } else if(data.status != nowOrders[id].status && data.status == 'inRating'){
+               typeToken= 'inRating'
+          } else if (data.designerUID != nowOrders[id].designerUID){
+              typeToken= 'inWork'
+          }
+          if (Platform.OS == 'android'){
+            sendPushNotifications(user.expoPushToken,typeToken)}
+         }})
       }
      else {
        statusRef.on('value',(snap) => {
@@ -84,22 +74,20 @@ import 'firebase/firestore'
      statusRef.off()
    }
 
-   // if(nowOrderId.join(' ') != Object.keys(nowOrder).join(' ')){
-   //   let newIdArr = []
-   //   let origNowOrder = Object.keys(nowOrder)
-   //   for(let i of origNowOrder){
-   //     newIdArr.push(i)
-   //     if(nowOrderId.indexOf(i) == -1){
-   //       addListener(i,firebase.database().ref('orders/' + (i)),'order')
-   //     }
-   //   }
-   //   setNowOrder(newIdArr)
-   //   state == 0 ? setState(1) : setState(0)
-   // }
+   if(nowOrderId.join(' ') != Object.keys(nowOrder).join(' ')){
+     let newIdArr = []
+     let origNowOrder = Object.keys(nowOrder)
+     for(let i of origNowOrder){
+       newIdArr.push(i)
+       if(nowOrderId.indexOf(i) == -1){
+         addListener(i,firebase.database().ref('orders/' + (i)),'order')
+       }
+     }
+     setNowOrder(newIdArr)
+   }
    // if(user.status == 'designer'){
    //   addListener('',firebase.database().ref('users/' + user.uid + '/balance'),'user')
    // }
-
     return (
       <ScrollView style={[styles.container,styles.profileWrapper]}>
         <View style={[styles.profileBlock,styles.p_fsm,{position:'relative'}]}>

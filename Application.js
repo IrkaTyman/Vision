@@ -1,19 +1,22 @@
-import React,{useEffect,useState} from 'react';
-import { StyleSheet, Text, View, SafeAreaView} from 'react-native';
+import React,{useEffect,useState,useRef} from 'react';
+import { StyleSheet, Text, View, SafeAreaView,Platform} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+// import * as Google from 'expo-google-app-auth';
+import Constants from 'expo-constants';
+import * as Notifications from 'expo-notifications';
+// Firebase
 import firebase from 'firebase/app'
 import "firebase/auth";
 import "firebase/database";
 import "firebase/firestore";
-import * as Google from 'expo-google-app-auth';
-import LogupStack from './src/routes/logupStack'
-import {reloadMessage} from './src/function/reloadMessage'
-import {reloadOrders} from './src/function/reloadOrders'
-//import {Google} from 'expo';
 //Redux
 import {connect,useDispatch} from 'react-redux'
 import {changeCountImgInGallery,addAllST,addPerson,removePerson,repeatEmail,incorEmailOrPass, addNowOrder,addOldOrders} from './src/redux/action'
-
+//function
+import {sortByDateArr} from './src/function/sortFunction'
+import {reloadMessage} from './src/function/reloadMessage'
+import {reloadOrders,reloadAllOrders} from './src/function/reloadOrders'
+import {sendPushNotifications} from './server-operations'
 //Components
 import {styles} from './src/components/Style'
 import {Button} from './src/components/Button'
@@ -22,43 +25,117 @@ import RegistrationWrapper from './src/screens/RegistrationWrapper'
 import Home from './src/screens/Home'
 import RootDrawerNavigation from './src/routes/rootDrawer'
 import BlockUser from './src/screens/BlockUser'
-import {sortByDateArr} from './src/function/sortFunction'
+import LogupStack from './src/routes/logupStack'
 
-
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 const Application = (props) => {
   const isLogin = props.isLogin
   const [block,setBlock] = useState(false)
+  const [expoPushToken,setToken] = useState('')
+  const [notification, setNotification] = useState(false);
   const dispatch = useDispatch()
   const [logUp,setLogUp] = useState(false)
   const db = firebase.database()
   const dbMessages = firebase.firestore().collection('messages_tree')
+  const notificationListener = useRef();
+   const responseListener = useRef();
+  // TODO Настроить expo notification
 
   useEffect(()=>{
     let timer
     if(props.user.status != 'moderator') {
         timer = setInterval(()=>{
           reloadMessage(props.user,props.user.uid,props.allMessages,dispatch)
-        },3600000)
+        },300000)
     } else {
       timer = setInterval(()=>{
         Object.keys(props.allUsers).map(item=>{
           reloadMessage(props.user,item,props.allMessages,dispatch,props.resolveIssueModerator,props.messagesAutor)
         })}
-      ,3600000)
+      ,300000)
     }
     return ()=> {clearTimeout(timer)}
   })
+
   useEffect(()=>{
     let timer
     if(props.user.status != 'moderator') {
         timer = setInterval(()=>{
           reloadOrders(props.user.orders,dispatch,props.user)
-        },18000000)
+        },60000)
     }
     return ()=> {clearTimeout(timer)}
   })
 
-  const submitLogupBtn = async (user,designer) => {
+  useEffect(()=>{
+    let timer
+    if(props.user.status == 'moderator') {
+        timer = setInterval(()=>{
+          reloadAllOrders(dispatch)
+        },60000)
+    }
+    return ()=> {clearTimeout(timer)}
+  })
+
+  useEffect(()=>{
+    if(Platform.OS === 'android'){
+      notificationListener.current = Notifications.addNotificationReceivedListener(setNotification);
+      responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+        setNotification(response.notification);
+      });
+
+      async function registerForPushNotificationsAsync(uid) {
+      let token;
+      if (Constants.isDevice) {
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
+        if (existingStatus !== 'granted') {
+          const { status } = await Notifications.requestPermissionsAsync();
+          finalStatus = status;
+        }
+        if (finalStatus !== 'granted') {
+          alert('Failed to get push token for push notification!');
+          return;
+        }
+        token = (await Notifications.getExpoPushTokenAsync()).data;
+      } else {
+        alert('Must use physical device for Push Notifications');
+      }
+
+      if (Platform.OS === 'android') {
+        Notifications.setNotificationChannelAsync('default', {
+          name: 'default',
+          importance: Notifications.AndroidImportance.MAX,
+          vibrationPattern: [0, 250, 250, 250],
+          lightColor: '#FF231F7C',
+        });
+      }
+      if(uid && expoPushToken == '') {
+        db.ref('users/'+uid+'/expoPushToken').set(token)
+        let user = props.user
+        user.expoPushToken = token
+        dispatch(addPerson(user))
+        setToken(token)
+      }
+      return token;
+    }
+      if(expoPushToken == '') registerForPushNotificationsAsync(props.user.uid)
+      return () => {
+              notificationListener.current &&
+                  Notifications.removeNotificationSubscription(notificationListener.current);
+              responseListener.current &&
+                  Notifications.removeNotificationSubscription(responseListener.current);
+          };
+    }
+  })
+
+  async function submitLogupBtn(user,designer){
     firebase.auth().createUserWithEmailAndPassword(user.email, user.password)
       .then(async (userCredential) => {
         const userData = JSON.stringify({email:user.email,password:user.password})
@@ -86,11 +163,7 @@ const Application = (props) => {
   }
 
   function submitModerator(){
-    db.ref('orders/').orderByChild('dateComplete').get().then((snap)=>{
-      if(snap.exists()){
-        dispatch(addAllST({who:'allOrders',what:snap.val()}))
-      }
-    })
+    reloadAllOrders(dispatch)
     db.ref('users/').get().then((snap)=>{
       if(snap.exists()){
         let users = {}
@@ -117,7 +190,7 @@ const Application = (props) => {
     })
   }
 
-  function submitUser(user,snapshot){
+  async function submitUser(user,snapshot){
     dbMessages.doc(user.uid+'').collection('messages').orderBy('timestamp').get().then((param) => {
       let messages = []
       param.forEach((doc) => {
@@ -130,10 +203,11 @@ const Application = (props) => {
     dbMessages.doc(user.uid+'').get().then((snap)=>{
        if (snap.exists) dispatch(addAllST({who:'readUserMessage',what:snap.data().readUserMessage}))
     })
+
     let date = new Date
     user.canSubsc = user.subscription.photo > 0 && user.subscription.day > date.setHours(date.getHours()+24)
     if(!user.canSubsc && user.subscription.day){
-      db.ref('users/'+userUID).update({subscription:{phoho:false,day:false,name:false},canSubsc:false})
+      db.ref('users/'+user.uid).update({subscription:{phoho:false,day:false,name:false},canSubsc:false})
     }
     let orders = snapshot.val().orders
     reloadOrders(orders,dispatch,user)
@@ -151,7 +225,7 @@ const Application = (props) => {
               let date = new Date
               user.uid = userUID
               if(snapshot.val().status=='moderator'){ submitModerator()}
-              else { submitUser(user,snapshot) }
+              else {submitUser(user,snapshot) }
               dispatch(incorEmailOrPass(false))
               dispatch(addPerson(user))
           } else {
@@ -169,7 +243,6 @@ const Application = (props) => {
       var errorMessage = error.message;
       console.log(errorMessage,errorCode)
     });
-
   }
 
 /*const googleSignIn = async () => {

@@ -43,7 +43,8 @@ export default function registerReducer(state = initialState,action){
           subscription:action.payload.subscription,
           canSubsc:action.payload.canSubsc,
           orders:action.payload.orders || [],
-          blocked:action.payload.blocked
+          blocked:action.payload.blocked,
+          expoPushToken:action.payload.expoPushToken|| ''
         },
         isLogin:true
       }

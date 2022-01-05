@@ -1,6 +1,6 @@
 import firebase from 'firebase/app'
 import 'firebase/database'
-import {addNowOrder,addOldOrders,changeCountImgInGallery} from '../redux/action'
+import {addNowOrder,addOldOrders,changeCountImgInGallery,addAllST} from '../redux/action'
 
 export function reloadOrders(ordersArr,dispatch,user){
   let nowOrder = {}
@@ -28,4 +28,12 @@ export function reloadOrders(ordersArr,dispatch,user){
           }
         })
     })}
+}
+
+export function reloadAllOrders(dispatch){
+  firebase.database().ref('orders/').orderByChild('dateComplete').get().then((snap)=>{
+    if(snap.exists()){
+      dispatch(addAllST({who:'allOrders',what:snap.val()}))
+    }
+  })
 }
